@@ -1,10 +1,10 @@
-### RL EXPERIMENTS
+# RL EXPERIMENTS
 
 Just tryin' some shit.
 
 _______________________________
 
-# Installing dependencies
+### Installing dependencies
  [Windows]
 
 create virtual environment:
