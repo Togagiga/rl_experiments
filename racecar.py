@@ -40,20 +40,19 @@ class Map():
 		# for y in range(0, height, self.tilesize):
 		# 	pygame.draw.line(win, (0,0,0), (0,y), (width, y))
 
-		map_shape =self.map.shape
 		for i in range(0, width, self.tilesize):
 			for j in range(0, height, self.tilesize):
 				if self.map[int(i/self.tilesize),int(j/self.tilesize)] == 0:
-					green = pygame.draw.rect(win, (3, 206, 78), (j, i, 0+self.tilesize, 0+self.tilesize))
+					green = pygame.draw.rect(win, (3, 206, 78), (j, i, self.tilesize, self.tilesize))
 				elif self.map[int(i/self.tilesize),int(j/self.tilesize)] == 1:
-					green = pygame.draw.rect(win, (67, 67, 67), (j, i, 0+self.tilesize, 0+self.tilesize))
+					green = pygame.draw.rect(win, (67, 67, 67), (j, i, self.tilesize, self.tilesize))
 
 
 
 class Car():
 
 	# need to initialise car position --> need to occupy whole number of squares
-	def __init__(self, x=width/2-car_width/2, y=height*(2/3), width=car_width, height=car_height):
+	def __init__(self, x=width/2-car_width/2, y=height/2 - car_height/2, width=car_width, height=car_height):
 		self.x = x
 		self.y = y
 		self.stationary = True # initially not moving (before player input)
@@ -61,8 +60,19 @@ class Car():
 		self.right = False
 		self.vel = 10          # how far car moves (in pixels) with each press of a button
 
-	# def checkLegalMove(self, initMap):
-		# need to check if move is allowed
+	def checkLegalMove(self, inpY, inpX):
+		
+		map_y = int(self.y/Map().tilesize + inpY)
+		map_x = int(self.x/Map().tilesize + inpX)
+
+		check =  np.argwhere(Map().map[map_y:map_y + 20, map_x:map_x + 10] == 0)
+		if len(check) != 0:
+			return False
+		else:
+			return True
+		# 	return True
+		# else:
+		# 	return False
 
 	def draw(self):
 		win.blit(car_img, (self.x, self.y))
@@ -93,10 +103,14 @@ while run:
 	keys = pygame.key.get_pressed()
 
 	# filters so car cannot go off screen
-	if keys[pygame.K_LEFT] and car.x >= car.vel:
+	if keys[pygame.K_LEFT] and car.x >= car.vel and car.checkLegalMove(0,-1):
 		car.x -= car.vel
-	elif keys[pygame.K_RIGHT] and car.x < width-car_width - car.vel:
+	elif keys[pygame.K_RIGHT] and car.x < width-car_width - car.vel and car.checkLegalMove(0,+1):
 		car.x += car.vel
+	elif keys[pygame.K_UP] and car.y >= car.vel and car.checkLegalMove(-1,0):
+		car.y -= car.vel
+	elif keys[pygame.K_DOWN] and car.y <= height-car_height - car.vel and car.checkLegalMove(1,0):
+		car.y += car.vel
 
 	redrawGameWindow()
 
