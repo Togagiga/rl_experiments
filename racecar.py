@@ -62,17 +62,17 @@ class Car():
 
 	def checkLegalMove(self, inpY, inpX):
 		
-		map_y = int(self.y/Map().tilesize + inpY)
+		map_y = int(self.y/Map().tilesize + inpY)     # position in tiles
 		map_x = int(self.x/Map().tilesize + inpX)
 
-		check =  np.argwhere(Map().map[map_y:map_y + 20, map_x:map_x + 10] == 0)
+		car_height_tiles = int(car_height/Map().tilesize)
+		car_width_tiles = int(car_width/Map().tilesize)
+
+		check =  np.argwhere(Map().map[map_y:map_y + car_height_tiles, map_x:map_x + car_width_tiles] == 0)  #define car on map
 		if len(check) != 0:
 			return False
 		else:
 			return True
-		# 	return True
-		# else:
-		# 	return False
 
 	def draw(self):
 		win.blit(car_img, (self.x, self.y))
