@@ -1,11 +1,11 @@
 # RL EXPERIMENTS
 
-Just tryin' some shit.
+An attempt at utilising reinforcement learning (RL) for a simple 2D game.
 
 _______________________________
 
 ##  Installing dependencies
- [Windows]
+ [Windows PowerShell]
 
 create virtual environment:
 ```
