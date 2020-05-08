@@ -4,9 +4,9 @@
 # need to ensure windows size, tile size and car initial position work!
 
 import numpy as np
-from os import path
+#from os import path
 import pygame as pg
-import time
+
 
 pg.init()
 size = width, height = 700, 700
