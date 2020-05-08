@@ -5,22 +5,22 @@
 
 import numpy as np
 from os import path
-import pygame
+import pygame as pg
 import time
 
-pygame.init()
+pg.init()
 size = width, height = 700, 700
-win = pygame.display.set_mode(size)
-pygame.display.set_caption('Car Race Game')
+win = pg.display.set_mode(size)
+pg.display.set_caption('Car Race Game')
 
-car_img = pygame.image.load('assets/car-top-view.png').convert_alpha()  # loading car image
-car_width, car_height = 100, 200                                        # specificing scaling size
-car_img = pygame.transform.scale(car_img, (car_width,car_height))       # scaling car image
+car_img = pg.image.load('assets/car-top-view.png').convert_alpha()  # loading car image
+car_width, car_height = 50, 100                                       # specificing scaling size
+car_img = pg.transform.scale(car_img, (car_width,car_height))       # scaling car image
 
 GREEN = (0, 138, 55)   # RGB Colours
 GREY = (67, 67, 67)
 
-clock = pygame.time.Clock()
+clock = pg.time.Clock()
 
 class Map():
 
@@ -37,13 +37,13 @@ class Map():
 		for i in range(0, width, self.tilesize):
 			for j in range(0, height, self.tilesize):
 				if self.map[int(i/self.tilesize),int(j/self.tilesize)] == 0:
-					pygame.draw.rect(win, GREEN, (j, i, self.tilesize, self.tilesize))
+					pg.draw.rect(win, GREEN, (j, i, self.tilesize, self.tilesize))
 				elif self.map[int(i/self.tilesize),int(j/self.tilesize)] == 1:
-					pygame.draw.rect(win, GREY, (j, i, self.tilesize, self.tilesize))
+					pg.draw.rect(win, GREY, (j, i, self.tilesize, self.tilesize))
 
 class Camera():
 	def __init__(self, width, height):
-		self.camera = pygame.Rect(0, 0, width, height) # define game window size
+		self.camera = pg.Rect(0, 0, width, height) # define game window size
 		self.width = width
 		self.height = height
 
@@ -67,8 +67,10 @@ class Car():
 
 	def checkLegalMove(self, inpY, inpX):
 		
-		map_y = int(self.y/Map().tilesize + inpY)     # position in tiles
+		map_y = int(self.y/Map().tilesize + inpY)
+		print(map_y)
 		map_x = int(self.x/Map().tilesize + inpX)
+		print(map_x)
 
 		car_height_tiles = int(car_height/Map().tilesize)
 		car_width_tiles = int(car_width/Map().tilesize)
@@ -88,7 +90,7 @@ def redrawGameWindow():
 	race_map.draw()
 	car.draw()
 
-	pygame.display.update()
+	pg.display.update()
 
 
 ######### Main Loop ##########
@@ -99,24 +101,24 @@ run = True
 while run:
 	clock.tick(27)  # 27 frames per second
 
-	for event in pygame.event.get():    # if exit button is pressed loop breaks
-		if  event.type == pygame.QUIT:
+	for event in pg.event.get():    # if exit button is pressed loop breaks
+		if  event.type == pg.QUIT:
 			run = False
 
 
-	keys = pygame.key.get_pressed()
+	keys = pg.key.get_pressed()
 
 	# filters so car cannot go off screen
-	if keys[pygame.K_LEFT] and car.x >= car.vel and car.checkLegalMove(0,-1):
+	if keys[pg.K_LEFT] and car.x >= car.vel and car.checkLegalMove(0,-1):
 		car.x -= car.vel
-	if keys[pygame.K_RIGHT] and car.x < width-car_width - car.vel and car.checkLegalMove(0,+1):
+	if keys[pg.K_RIGHT] and car.x < width-car_width - car.vel and car.checkLegalMove(0,+1):
 		car.x += car.vel
-	if keys[pygame.K_UP] and car.y >= car.vel and car.checkLegalMove(-1,0):
+	if keys[pg.K_UP] and car.y >= car.vel and car.checkLegalMove(-1,0):
 		car.y -= car.vel
-	if keys[pygame.K_DOWN] and car.y <= height-car_height - car.vel and car.checkLegalMove(1,0):
+	if keys[pg.K_DOWN] and car.y <= height-car_height - car.vel and car.checkLegalMove(1,0):
 		car.y += car.vel
 	# need to account for velx and vely
 
 	redrawGameWindow()
 
-pygame.quit()
+pg.quit()

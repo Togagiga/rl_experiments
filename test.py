@@ -75,7 +75,7 @@ def mainLoop():
 		pg.display.update()
 		clock.tick(60)
 
-	return count
+	print('Your score was: {}'.format(count))
 
 mainLoop()
 pg.quit()
