@@ -1,7 +1,7 @@
 # wee race car game
 
 # need to add proper map
-# changed
+# changed again
 # need to ensure windows size, tile size and car initial position work!
 
 import numpy as np
