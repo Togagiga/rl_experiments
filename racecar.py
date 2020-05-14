@@ -5,16 +5,16 @@
 # need to ensure windows size, tile size and car initial position work!
 
 import numpy as np
-#from os import path
 import pygame as pg
+import math
 
 
 pg.init()
 size = width, height = 1200, 1200
 win = pg.display.set_mode(size)
-pg.display.set_caption('Car Race Game')
+pg.display.set_caption('Car Race')
 
-road_width = 10000
+road_width = 20
 car_img = pg.image.load('assets/car-top-view.png').convert_alpha()  # loading car image
 car_width, car_height = 50, 100                                       # specificing scaling size
 car_img = pg.transform.scale(car_img, (car_width,car_height))       # scaling car image
@@ -35,7 +35,7 @@ class Map():
         self.map = np.zeros((int(width/self.tilesize), int(height/self.tilesize)), dtype = int)
         
         shape = self.map.shape
-        self.map[:,int(shape[0]/2-road_width):int(shape[1]/2+road_width)] = 1   # make road of ones
+        self.map[:,int(0.5*shape[1]-road_width):int(0.5*shape[1]+road_width)] = 1   # make road of ones
 
     def draw(self):
 
@@ -46,17 +46,6 @@ class Map():
                 elif self.map[int(i/self.tilesize),int(j/self.tilesize)] == 1:
                     pg.draw.rect(win, GREY, (j, i, self.tilesize, self.tilesize))
 
-class Camera():
-    def __init__(self, width, height):
-        self.camera = pg.Rect(0, 0, width, height) # define game window size
-        self.width = width
-        self.height = height
-
-    def update(self, target):
-
-        x = -target.x + int(width/2)
-        y = -target.y + int(height/2)
-        self.camera = pg.Rect(x, y, self.width, self.height)
 
 def rot_center(img, theta):
 
@@ -69,34 +58,51 @@ def rot_center(img, theta):
 class Car():
 
     # need to initialise car position --> need to occupy whole number of squares
-    def __init__(self, x=width/2-car_width/2, y=height/2 - car_height/2, width=car_width, height=car_height, vel = 0, theta = 0 , pos_x = 0, pos_y = 0):
+    def __init__(self, x=width/2-car_width/2, y=height/2 - car_height/2, width=car_width, height=car_height, vel = 0, theta = 0):
         self.x = int(x)
         self.y = int(y)
-        self.pos_x = pos_x
-        self.pos_y = pos_y
         self.theta = theta
         self.stationary = True # initially not moving (before player input)
         self.left = False
         self.right = False
         self.vel = vel          # how far car moves (in pixels) with each press of a button
 
-    def checkLegalMove(self, inpY, inpX):
+    def update_pos(self, vel, theta):
+        self.y -= np.cos(theta*(2*np.pi)/360)*vel              #calculates new x,y coordinates based on current x,y,vel,theta 
+        self.x -= np.sin(theta*(2*np.pi)/360)*vel
+
+    def checkLegalMove(self, vel, theta):
+
+        #self.update_pos(vel, theta)
+
+        self.y -= np.cos(theta*(2*np.pi)/360)*vel              #calculates new x,y coordinates based on current x,y,vel,theta 
+        self.x -= np.sin(theta*(2*np.pi)/360)*vel
+
+        img_check = rot_center(car_img, theta)
+
+        car_h = img_check.get_rect().height   # rotated size of car
+        print(car_h)
+        car_w = img_check.get_rect().width
+        print(car_w)
         
-        map_y = int(self.y/Map().tilesize + inpY)     # position in tiles
-        map_x = int(self.x/Map().tilesize + inpX)
+        map_y = math.floor(self.y/Map().tilesize)     # position in tiles
+        map_x = math.floor(self.x/Map().tilesize)
 
-        car_height_tiles = int(car_height/Map().tilesize)
-        car_width_tiles = int(car_width/Map().tilesize)
+        car_h_tiles = math.ceil(car_h/Map().tilesize)  # getting car size in tiles
+        car_w_tiles = math.ceil(car_w/Map().tilesize)
 
-        check =  np.argwhere(Map().map[map_y:map_y + car_height_tiles, map_x:map_x + car_width_tiles] == 0)  # if car is on zeros
+        check =  np.argwhere(Map().map[map_y:map_y + car_h_tiles, map_x:map_x + car_w_tiles] == 0)  # if car is on zeros
         if len(check) != 0:
+            print('crashed')
             return False
         else:
+            print('not crashed')
             return True
 
+
     def draw(self):
-        self.y -= np.cos(self.theta*(2*np.pi)/360)*(self.vel)              #calculates new x,y coordinates based on current x,y,vel,theta 
-        self.x -= np.sin(self.theta*(2*np.pi)/360)*self.vel               
+        self.y -= np.cos(self.theta*(2*np.pi)/360)*self.vel              #calculates new x,y coordinates based on current x,y,vel,theta 
+        self.x -= np.sin(self.theta*(2*np.pi)/360)*self.vel              
         img = rot_center(car_img, self.theta)                              #calls function to rotate image around centre point
         win.blit(img, (self.x - (img.get_rect().width - car_width)/2, self.y - (img.get_rect().height - car_height)/2)) #subtracting from x and y to ensure smooth rotation
 
@@ -123,6 +129,10 @@ while run:
 
     keys = pg.key.get_pressed()
 
+    if not car.checkLegalMove(car.vel, car.theta):
+        run = False
+    else: 
+        pass
 
     if keys[pg.K_UP] and keys[pg.K_LEFT]:
         car.vel += vel_inc
@@ -149,7 +159,7 @@ while run:
     if car.vel >= 0: 
         car.vel -= drag_const*np.square(car.vel)     
     else:
-        car.vel += drag_const*np.square(car.vel)  
+        car.vel += drag_const*np.square(car.vel)
     
     redrawGameWindow()
 
