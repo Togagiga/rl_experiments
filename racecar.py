@@ -10,8 +10,8 @@ size = width, height = 1200, 1200
 win = pg.display.set_mode(size)
 pg.display.set_caption('Car Race')
 
-road_width = 20
-car_img = pg.image.load('assets/car-top-view.png').convert_alpha()   # loading car image
+road_width = 2
+car_img = pg.image.load('assets/car-top-view.png').convert_alpha()  # loading car image
 car_width, car_height = 50, 100                                      # specificing scaling size
 car_img = pg.transform.scale(car_img, (car_width,car_height))        # scaling car image
 
@@ -22,6 +22,7 @@ drag_const = 0.001
 GREEN = (0, 138, 55)                                                 # RGB Colours
 GREY = (67, 67, 67)
 RED = (253, 8, 8)
+BLUE = (0, 188, 255)
 
 clock = pg.time.Clock()
 
@@ -56,7 +57,7 @@ class Map():
 
 def rot_center(img, theta):
 
-    loc = img.get_rect().center                                #rot_image is not defined 
+    loc = img.get_rect().center                                # rot_image is not defined 
     rot_sprite = pg.transform.rotate(img, theta)
     rot_sprite.get_rect().center = loc
     return rot_sprite
@@ -64,7 +65,7 @@ def rot_center(img, theta):
 
 class Car():
 
-    def __init__(self, x=1000, y=1000, vel = 0, theta = 0):    # x=width/2-car_width/2, y=height/2 - car_height/2,
+    def __init__(self, x=1000, y=1000, vel = 0, theta = 0):
         self.x = int(x)
         self.y = int(y)
         self.theta = theta
@@ -109,9 +110,45 @@ class Car():
 
 
 
+    def sensor(self):
+
+        ### Visulisation ###
+        img_check = rot_center(car_img, self.theta)            # rotating original image of car
+        centre = img_check.get_rect().center                   # get centre coords from top corner of car image
+
+        centre_x = self.x - (img_check.get_rect().width - car_width)/2 + centre[0]     # centre of car image in x
+        beam_length_x = centre_x - 400*np.sin(self.theta*(2*np.pi)/360)                # length of beam in x
+        centre_y = self.y - (img_check.get_rect().height - car_height)/2 + centre[1]   # centre of car image in y
+        beam_length_y = centre_y - 400*np.cos(self.theta*(2*np.pi)/360)                # length of beam in y
+
+        pg.draw.line(win, BLUE, (centre_x, centre_y), (beam_length_x, beam_length_y))  # draw beam
+
+        ### Obstacle Detection ###
+        sensorx = centre_x
+        sensory = centre_y
+        for i in range(80):                                                            # interate from centre of car until beam length reached
+            point = (math.floor(sensorx/Map().tilesize), math.floor(sensory/Map().tilesize))
+        
+            if Map().map[point[1],point[0]] == 0:    # check current point along beam again map
+                print('valid reading')
+                break
+            else:
+                pass
+
+            sensorx -= 5*np.sin(self.theta*(2*np.pi)/360)  # next point along line
+            sensory -= 5*np.cos(self.theta*(2*np.pi)/360)
+
+
+        ### Return Sensor Readings (relative to car) ###
+        sensor_read = math.sqrt((centre_x - sensorx)**2 + (centre_y - sensory)**2) # distance formula in x
+
+        return sensor_read
+
+
 def redrawGameWindow():
     race_map.draw()
     car.draw()
+    print('Front sensor reading: {}'.format(car.sensor()))
 
     pg.display.update()
 
