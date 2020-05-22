@@ -111,7 +111,7 @@ class Car():
 
     def sensor(self, sensor_type='FRONT'):
 
-        # defining sensor props 'TYPE':[sensor_range, angle]
+        # defining sensor props 'TYPE':[sensor_range, sensor_angle]
         sensor_dict = {'FRONT':[200, 0], 'LEFT':[100, np.pi/2], 'RIGHT':[100, -np.pi/2], 'REAR':[200, np.pi]}
         sensor_range, sensor_angle = sensor_dict[sensor_type]
 
@@ -119,12 +119,12 @@ class Car():
         img_check = rot_center(car_img, self.theta)                                    # rotating original image of car
         centre = img_check.get_rect().center                                           # get centre coords from top corner of car image
 
-        centre_x = self.x - (img_check.get_rect().width - car_width)/2 + centre[0]     # centre of car image in x
+        centre_x = self.x - (img_check.get_rect().width - car_width)/2 + centre[0]                             # centre of car image in x
         beam_length_x = centre_x - sensor_range*np.sin(self.theta*(2*np.pi)/360 + sensor_angle)                # length of beam in x
-        centre_y = self.y - (img_check.get_rect().height - car_height)/2 + centre[1]   # centre of car image in y
+        centre_y = self.y - (img_check.get_rect().height - car_height)/2 + centre[1]                           # centre of car image in y
         beam_length_y = centre_y - sensor_range*np.cos(self.theta*(2*np.pi)/360 + sensor_angle)                # length of beam in y
 
-        pg.draw.line(win, BLUE, (centre_x, centre_y), (beam_length_x, beam_length_y))  # draw beam
+        pg.draw.line(win, BLUE, (centre_x, centre_y), (beam_length_x, beam_length_y))                          # draw beam
 
         ### Obstacle Detection ###
         sensorx = centre_x
@@ -132,20 +132,20 @@ class Car():
         for i in range(int(sensor_range/5)):                                                            # interate from centre of car until beam length reached
             point = (math.floor(sensorx/Map().tilesize), math.floor(sensory/Map().tilesize))
 
-            if point[0] > width/Map().tilesize -1 or point[1] > height/Map().tilesize -1:                # prevent crash of codeif no wall between car and edge of map
+            if point[0] > width/Map().tilesize -1 or point[1] > height/Map().tilesize -1:               # prevent crash of codeif no wall between car and edge of map
                 sensor_read = sensor_range
                 break
         
-            if Map().map[point[1],point[0]] == 0:                                      # check current point along beam again map
+            if Map().map[point[1],point[0]] == 0:                                                       # check current point along beam again map
                 break
             else:
                 pass
 
-            sensorx -= 5*np.sin(self.theta*(2*np.pi)/360 + sensor_angle)                              # next point along line
+            sensorx -= 5*np.sin(self.theta*(2*np.pi)/360 + sensor_angle)                                # next point along line
             sensory -= 5*np.cos(self.theta*(2*np.pi)/360 + sensor_angle)
 
         ### Return Sensor Readings (relative to car) ###
-        sensor_read = math.sqrt((centre_x - sensorx)**2 + (centre_y - sensory)**2)     # distance formula in x
+        sensor_read = math.sqrt((centre_x - sensorx)**2 + (centre_y - sensory)**2)                      # distance formula in x
 
         return round(sensor_read)
 
