@@ -61,11 +61,11 @@ def mainLoop():
 		car(x,y)
 		score(count)
 
-		if box_starty > win_height:   # regenerating box
+		if box_starty > win_height:   # regenerating boxf
 			box_starty = 0 - box_h
 			box_startx = random.randrange(0, win_width-box_w)
 			count += 1                # keep score
-			box_speed += 0.5          # make boxes move faster incrementially
+			box_speed += 0.1          # make boxes move faster incrementially
 
 
 		if y < box_starty + box_h:

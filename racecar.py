@@ -11,7 +11,7 @@ win = pg.display.set_mode(size)
 pg.display.set_caption('Car Race')
 
 road_width = 2
-car_img = pg.image.load('assets/car-top-view.png').convert_alpha()  # loading car image
+car_img = pg.image.load('assets/car-top-view.png').convert_alpha()   # loading car image
 car_width, car_height = 50, 100                                      # specificing scaling size
 car_img = pg.transform.scale(car_img, (car_width,car_height))        # scaling car image
 
@@ -109,46 +109,54 @@ class Car():
         win.blit(img, (self.x - (img.get_rect().width - car_width)/2, self.y - (img.get_rect().height - car_height)/2)) #subtracting from x and y to ensure smooth rotation
 
 
+    def sensor(self, sensor_type='FRONT'):
 
-    def sensor(self):
+        # defining sensor props 'TYPE':[sensor_range, angle]
+        sensor_dict = {'FRONT':[200, 0], 'LEFT':[100, np.pi/2], 'RIGHT':[100, -np.pi/2], 'REAR':[200, np.pi]}
+        sensor_range, sensor_angle = sensor_dict[sensor_type]
 
         ### Visulisation ###
-        img_check = rot_center(car_img, self.theta)            # rotating original image of car
-        centre = img_check.get_rect().center                   # get centre coords from top corner of car image
+        img_check = rot_center(car_img, self.theta)                                    # rotating original image of car
+        centre = img_check.get_rect().center                                           # get centre coords from top corner of car image
 
         centre_x = self.x - (img_check.get_rect().width - car_width)/2 + centre[0]     # centre of car image in x
-        beam_length_x = centre_x - 400*np.sin(self.theta*(2*np.pi)/360)                # length of beam in x
+        beam_length_x = centre_x - sensor_range*np.sin(self.theta*(2*np.pi)/360 + sensor_angle)                # length of beam in x
         centre_y = self.y - (img_check.get_rect().height - car_height)/2 + centre[1]   # centre of car image in y
-        beam_length_y = centre_y - 400*np.cos(self.theta*(2*np.pi)/360)                # length of beam in y
+        beam_length_y = centre_y - sensor_range*np.cos(self.theta*(2*np.pi)/360 + sensor_angle)                # length of beam in y
 
         pg.draw.line(win, BLUE, (centre_x, centre_y), (beam_length_x, beam_length_y))  # draw beam
 
         ### Obstacle Detection ###
         sensorx = centre_x
         sensory = centre_y
-        for i in range(80):                                                            # interate from centre of car until beam length reached
+        for i in range(int(sensor_range/5)):                                                            # interate from centre of car until beam length reached
             point = (math.floor(sensorx/Map().tilesize), math.floor(sensory/Map().tilesize))
+
+            if point[0] > width/Map().tilesize -1 or point[1] > height/Map().tilesize -1:                # prevent crash of codeif no wall between car and edge of map
+                sensor_read = sensor_range
+                break
         
-            if Map().map[point[1],point[0]] == 0:    # check current point along beam again map
-                print('valid reading')
+            if Map().map[point[1],point[0]] == 0:                                      # check current point along beam again map
                 break
             else:
                 pass
 
-            sensorx -= 5*np.sin(self.theta*(2*np.pi)/360)  # next point along line
-            sensory -= 5*np.cos(self.theta*(2*np.pi)/360)
-
+            sensorx -= 5*np.sin(self.theta*(2*np.pi)/360 + sensor_angle)                              # next point along line
+            sensory -= 5*np.cos(self.theta*(2*np.pi)/360 + sensor_angle)
 
         ### Return Sensor Readings (relative to car) ###
-        sensor_read = math.sqrt((centre_x - sensorx)**2 + (centre_y - sensory)**2) # distance formula in x
+        sensor_read = math.sqrt((centre_x - sensorx)**2 + (centre_y - sensory)**2)     # distance formula in x
 
-        return sensor_read
+        return round(sensor_read)
 
 
 def redrawGameWindow():
     race_map.draw()
     car.draw()
-    print('Front sensor reading: {}'.format(car.sensor()))
+    print('--> Front sensor reading: {}'.format(car.sensor('FRONT')))
+    print('--> Left sensor reading: {}'.format(car.sensor('LEFT')))
+    print('--> Left sensor reading: {}'.format(car.sensor('RIGHT')))
+    print('--> Left sensor reading: {}'.format(car.sensor('REAR')))
 
     pg.display.update()
 
@@ -158,9 +166,9 @@ car = Car()
 race_map = Map()
 run = True
 while run:
-    clock.tick(27)                                             # 27 frames per second
+    clock.tick(27)                                                                     # 27 frames per second
 
-    for event in pg.event.get():                               # if exit button is pressed loop breaks
+    for event in pg.event.get():                                                       # if exit button is pressed loop breaks
         if  event.type == pg.QUIT:
             run = False
 
