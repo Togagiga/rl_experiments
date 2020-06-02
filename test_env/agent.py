@@ -48,7 +48,6 @@ class DQN():
 		return np.argmax(act_values[0])             # choose best outcome from model as action
 
 
-	# Why is this needed????
 	def replay(self):
 
 		if len(self.memory) < self.batch_size:
@@ -95,7 +94,7 @@ def train_dpn(episode):
 			next_state = np.reshape(next_state, (1,4))
 			agent.remember(state, action, reward, next_state, done)
 			state = next_state
-			agent.replay()     # Why?
+			agent.replay()     # fix
 			if done:
 				print("episode: {}/{}, score: {}".format(e, episode, score))
 				break
