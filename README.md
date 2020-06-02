@@ -1,30 +1,16 @@
 # RL EXPERIMENTS
 
 An attempt at utilising reinforcement learning (RL) for a simple 2D game.
-
 _______________________________
 
-##  Installing dependencies
- [Windows PowerShell]
+##  test_env
 
-create virtual environment:
-```
-python -m venv venv
-```
-
-activate environment:
-```
-venv\Scripts\activate
-```
-
-install from requirements.txt:
-```
-pip install -r requirements.txt
-```
-
+- [x] Simple game written as environment (Input: [Action], Output: [State, Reward])
+- [x] Simple agent based on Q-Learning with Experience Replay
 _______________________________
 
-## TODO
+## TODO: racecar_env
 
-- [ ] Make basic race car game
-- [ ] RL inputs (up, down, left, right)
+- [ ] Make basic racecar environment
+- [ ] Make simple agent
+- [ ] Train agent -> Plot results
