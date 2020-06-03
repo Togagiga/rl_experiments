@@ -88,7 +88,7 @@ class Car():
         rot_sprite.get_rect().center = loc
         return rot_sprite
 
-    def checkLegalMove(self, vel, theta):
+    def checkLegalMove(self, vel, theta, score):
 
         self.update_pos(vel, theta)
         img_check = self.rot_center(car_img, theta)                 # rotating image of car
@@ -106,42 +106,23 @@ class Car():
         car_w_tiles = math.ceil(car_w/Map().tilesize)
 
         check =  np.argwhere(Map().map[map_y:map_y + car_h_tiles, map_x:map_x + car_w_tiles] == 0)  # if car is on zeros on map
+        check_score = np.argwhere(Map().map[map_y:map_y + car_h_tiles, map_x:map_x + car_w_tiles] == 2)
         
         if len(check) != 0:
             print('crashed')
-            return False
-        else:
-            
-            return True
-        
-        
-    def checkScore(self, vel, theta, score):
-
-        self.update_pos(vel, theta)
-        img_check = self.rot_center(car_img, theta)                 # rotating image of car
-
-        car_h = img_check.get_rect().height                    # rotated size of car
-        car_w = img_check.get_rect().width
-
-        check_x = self.x - (car_w - car_width)/2               # position account for car turning
-        check_y = self.y - (car_h - car_height)/2
-        
-        map_y = math.floor(check_y/Map().tilesize)             # position in tiles
-        map_x = math.floor(check_x/Map().tilesize)
-
-        car_h_tiles = math.ceil(car_h/Map().tilesize)          # getting car size in tiles
-        car_w_tiles = math.ceil(car_w/Map().tilesize)
-
-        check = np.argwhere(Map().map[map_y:map_y + car_h_tiles, map_x:map_x + car_w_tiles] == 2)
-        
-        if len(check) != 0:
-            self.on_red = 1
+            return False, score
             
         else:
-            if self.on_red == 1:
-                score += 1
-            self.on_red = 0
-        return score
+            if len(check_score) != 0:
+                self.on_red = 1
+            
+            else:
+                if self.on_red == 1:
+                    score += 1
+                self.on_red = 0
+            return True, score
+            
+        
 
     def draw(self):
         self.update_pos(self.vel, self.theta)                  # updating x y coords          
@@ -266,20 +247,17 @@ def playGame(run, play):
         controls()        #registers key strokes 
         car.vel = drag(car.vel) #call drag function
         redrawGameWindow()
+        run, car.score = car.checkLegalMove(car.vel, car.theta, car.score)             # checks whether car is on road or not
 
-        if not car.checkLegalMove(car.vel, car.theta):             # checks whether car is on road or not
-            run = False
-        else: 
-            pass
         
-        car.score = car.checkScore(car.vel, car.theta, car.score)
+
         print("Score: ",car.score)
         for event in pg.event.get():                                                       # if exit button is pressed loop breaks
             if  event.type == pg.QUIT:
                 play = False
                 print('User Quit Game!')
                 run = False
-
+        car.score += np.square(car.vel)*0.001
     pg.quit()
     return play
 
