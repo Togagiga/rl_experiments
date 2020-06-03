@@ -4,7 +4,7 @@ import numpy as np
 import pygame as pg
 import math
 import time
-import pygame.freetype
+import random
 
 play = True
 size = width, height = 1200, 1200                                    # size of window
@@ -71,7 +71,7 @@ class Map():
                 elif self.map[int(i/self.tilesize),int(j/self.tilesize)] == 1:
                     pg.draw.rect(win, GREY, (j, i, self.tilesize, self.tilesize))
                 elif self.map[int(i/self.tilesize),int(j/self.tilesize)] == 2:
-                    pg.draw.rect(win, RED, (j, i, self.tilesize, self.tilesize))
+                    pg.draw.rect(win, GREY, (j, i, self.tilesize, self.tilesize))
 
 
 
@@ -198,6 +198,7 @@ def drag(vel):
     return vel
 
 ### Takes key inputs and translates to change in velocity/angle ###
+"""
 def controls():
     keys = pg.key.get_pressed()     
 
@@ -221,20 +222,27 @@ def controls():
         car.theta -= theta_inc
     elif keys[pg.K_UP]:
         car.vel += vel_inc
-    
 
+"""
+def controls(action):
+         
+
+    if action == 0:
+        car.vel += vel_inc
+        car.theta += theta_inc
+    elif action == 1:
+        car.vel += vel_inc
+        car.theta -= theta_inc
+    elif action == 2:
+        car.theta += theta_inc
+    elif action == 3:
+        car.theta -= theta_inc
+    elif action == 4:
+        car.vel += vel_inc
 
 def redrawGameWindow():
     
     car.draw()
-
-    car.sensor('FRONT')
-    car.sensor('LEFT')
-    car.sensor('RIGHT')
-    car.sensor('F_RIGHT')
-    car.sensor('F_LEFT')
-    
-
     pg.display.update()
 
 
@@ -251,12 +259,17 @@ def resetGame():
     return win, car, race_map, run, car_img
 
 
+def AI():
+    
+    states = [car.sensor('FRONT'), car.sensor('LEFT'), car.sensor('RIGHT'), car.sensor('F_RIGHT'), car.sensor('F_LEFT'), car.vel]
+    car.score
+
 ######################## MAIN GAME LOOP ########################
 def playGame(run, play):
     while run:
-        clock.tick(30)                                              # 27 frames per second
-
-        controls()        #registers key strokes 
+        clock.tick(30)                                              # Define frames per second
+        action = random.randint(0, 4)
+        controls(action)        #registers key strokes 
         car.vel = drag(car.vel) #call drag function
         redrawGameWindow()
         run, car.score = car.checkLegalMove(car.vel, car.theta, car.score)             # checks whether car is on road or not
