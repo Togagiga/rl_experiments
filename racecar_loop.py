@@ -4,6 +4,7 @@ import numpy as np
 import pygame as pg
 import math
 import time
+import pygame.freetype
 
 play = True
 size = width, height = 1200, 1200                                    # size of window
@@ -12,11 +13,13 @@ car_width, car_height = 25, 50                                      # size of ca
 vel_inc = 0.4
 theta_inc = 4
 drag_const = 0.001
+score = 0
 
 GREEN = (0, 138, 55)                                                 # RGB Colours
 GREY = (67, 67, 67)
 RED = (253, 8, 8)
 BLUE = (0, 188, 255)
+
 
 clock = pg.time.Clock()
 
@@ -27,7 +30,7 @@ class Map():
         self.tilesize = 10
         self.map = np.zeros((int(width/self.tilesize), int(height/self.tilesize)), dtype = int)
         
-        shape = self.map.shape
+
 
         ### Making Ghetto Map ###
 
@@ -37,6 +40,18 @@ class Map():
         self.map[40:60, 30:80] = 1
         self.map[60:110, 60:80] = 1
         self.map[90:110, 0:80] = 1
+        
+        ### Drawing reward lines ###
+        
+        self.map[90:91, 90:110] = 2
+        self.map[70:71, 90:110] = 2
+        self.map[50:51, 90:110] = 2
+        self.map[30:31, 90:110] = 2
+        
+        self.map[10:30, 89:90] = 2
+        self.map[10:30, 70:71] = 2
+        self.map[10:30, 50:51] = 2
+        self.map[10:30, 30:31] = 2
 
     def draw(self):
 
@@ -46,17 +61,21 @@ class Map():
                     pg.draw.rect(win, GREEN, (j, i, self.tilesize, self.tilesize))
                 elif self.map[int(i/self.tilesize),int(j/self.tilesize)] == 1:
                     pg.draw.rect(win, GREY, (j, i, self.tilesize, self.tilesize))
+                elif self.map[int(i/self.tilesize),int(j/self.tilesize)] == 2:
+                    pg.draw.rect(win, RED, (j, i, self.tilesize, self.tilesize))
 
 
 
 
 class Car():
 
-    def __init__(self, x=1000, y=1000, vel = 0, theta = 0):
+    def __init__(self, x=1000, y=1000, vel = 0, theta = 0, on_red = 0, score = 0):
         self.x = int(x)
         self.y = int(y)
         self.theta = theta
         self.vel = vel                                         # how far car moves (in pixels) with each press of a button
+        self.on_red = on_red
+        self.score = score
 
     def update_pos(self, vel, theta):
         self.y -= np.cos(theta*(2*np.pi)/360)*vel              # calculates new x,y coordinates based on current x,y,vel,theta 
@@ -87,13 +106,42 @@ class Car():
         car_w_tiles = math.ceil(car_w/Map().tilesize)
 
         check =  np.argwhere(Map().map[map_y:map_y + car_h_tiles, map_x:map_x + car_w_tiles] == 0)  # if car is on zeros on map
+        
         if len(check) != 0:
             print('crashed')
             return False
         else:
-            print('not crashed')
+            
             return True
+        
+        
+    def checkScore(self, vel, theta, score):
 
+        self.update_pos(vel, theta)
+        img_check = self.rot_center(car_img, theta)                 # rotating image of car
+
+        car_h = img_check.get_rect().height                    # rotated size of car
+        car_w = img_check.get_rect().width
+
+        check_x = self.x - (car_w - car_width)/2               # position account for car turning
+        check_y = self.y - (car_h - car_height)/2
+        
+        map_y = math.floor(check_y/Map().tilesize)             # position in tiles
+        map_x = math.floor(check_x/Map().tilesize)
+
+        car_h_tiles = math.ceil(car_h/Map().tilesize)          # getting car size in tiles
+        car_w_tiles = math.ceil(car_w/Map().tilesize)
+
+        check = np.argwhere(Map().map[map_y:map_y + car_h_tiles, map_x:map_x + car_w_tiles] == 2)
+        
+        if len(check) != 0:
+            self.on_red = 1
+            
+        else:
+            if self.on_red == 1:
+                score += 1
+            self.on_red = 0
+        return score
 
     def draw(self):
         self.update_pos(self.vel, self.theta)                  # updating x y coords          
@@ -187,11 +235,13 @@ def controls():
 def redrawGameWindow():
     race_map.draw()
     car.draw()
-    print('--> Front sensor reading: {}'.format(car.sensor('FRONT')))
-    print('--> Left sensor reading: {}'.format(car.sensor('LEFT')))
-    print('--> Right sensor reading: {}'.format(car.sensor('RIGHT')))
-    print('--> Front right sensor reading: {}'.format(car.sensor('F_RIGHT')))
-    print('--> Front left sensor reading: {}'.format(car.sensor('F_LEFT')))
+
+    car.sensor('FRONT')
+    car.sensor('LEFT')
+    car.sensor('RIGHT')
+    car.sensor('F_RIGHT')
+    car.sensor('F_LEFT')
+    
 
     pg.display.update()
 
@@ -221,7 +271,9 @@ def playGame(run, play):
             run = False
         else: 
             pass
-
+        
+        car.score = car.checkScore(car.vel, car.theta, car.score)
+        print("Score: ",car.score)
         for event in pg.event.get():                                                       # if exit button is pressed loop breaks
             if  event.type == pg.QUIT:
                 play = False
