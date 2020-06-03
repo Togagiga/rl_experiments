@@ -106,7 +106,7 @@ class Car():
     def sensor(self, sensor_type='FRONT'):
 
         # defining sensor props 'TYPE':[sensor_range, sensor_angle]
-        sensor_dict = {'FRONT':[200, 0], 'LEFT':[100, np.pi/2], 'RIGHT':[100, -np.pi/2], 'REAR':[200, np.pi]}
+        sensor_dict = {'FRONT':[400, 0], 'LEFT':[300, np.pi/2], 'RIGHT':[300, -np.pi/2], 'F_RIGHT':[300, -np.pi*1/4], 'F_LEFT':[300, np.pi*1/4]}
         sensor_range, sensor_angle = sensor_dict[sensor_type]
 
         ### Visulisation ###
@@ -114,11 +114,11 @@ class Car():
         centre = img_check.get_rect().center                                           # get centre coords from top corner of car image
 
         centre_x = self.x - (img_check.get_rect().width - car_width)/2 + centre[0]                             # centre of car image in x
-        beam_length_x = centre_x - sensor_range*np.sin(self.theta*(2*np.pi)/360 + sensor_angle)                # length of beam in x
+                   
         centre_y = self.y - (img_check.get_rect().height - car_height)/2 + centre[1]                           # centre of car image in y
         beam_length_y = centre_y - sensor_range*np.cos(self.theta*(2*np.pi)/360 + sensor_angle)                # length of beam in y
 
-        pg.draw.line(win, BLUE, (centre_x, centre_y), (beam_length_x, beam_length_y))                          # draw beam
+                                  # draw beam
 
         ### Obstacle Detection ###
         sensorx = centre_x
@@ -140,7 +140,12 @@ class Car():
 
         ### Return Sensor Readings (relative to car) ###
         sensor_read = math.sqrt((centre_x - sensorx)**2 + (centre_y - sensory)**2)                      # distance formula in x
-
+        
+        
+        beam_length_x = centre_x - sensor_read*np.sin(self.theta*(2*np.pi)/360 + sensor_angle)     # length of beam in x
+        beam_length_y = centre_y - sensor_read*np.cos(self.theta*(2*np.pi)/360 + sensor_angle)                # length of beam in y
+        pg.draw.line(win, BLUE, (centre_x, centre_y), (beam_length_x, beam_length_y))
+        
         return round(sensor_read)
 
 ### function to produce drag effect ###
@@ -185,7 +190,8 @@ def redrawGameWindow():
     print('--> Front sensor reading: {}'.format(car.sensor('FRONT')))
     print('--> Left sensor reading: {}'.format(car.sensor('LEFT')))
     print('--> Right sensor reading: {}'.format(car.sensor('RIGHT')))
-    print('--> Rear sensor reading: {}'.format(car.sensor('REAR')))
+    print('--> Front right sensor reading: {}'.format(car.sensor('F_RIGHT')))
+    print('--> Front left sensor reading: {}'.format(car.sensor('F_LEFT')))
 
     pg.display.update()
 
