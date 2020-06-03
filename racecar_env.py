@@ -76,7 +76,7 @@ class Map():
                 elif self.map[int(i/self.tilesize),int(j/self.tilesize)] == 1:
                     pg.draw.rect(self.game.win, GREY, (j, i, self.tilesize, self.tilesize))
                 elif self.map[int(i/self.tilesize),int(j/self.tilesize)] == 2:
-                    pg.draw.rect(self.game.win, RED, (j, i, self.tilesize, self.tilesize))
+                    pg.draw.rect(self.game.win, GREY, (j, i, self.tilesize, self.tilesize))
 
 
 
@@ -140,14 +140,11 @@ class Car():
             
         else:
             if len(check_score) != 0:
-                print("on red line")
                 self.on_red = 1
             
             else:
-                print("off red line")
                 if self.on_red == 1:
                     self.game.reward += 5
-                    print("added")
                 self.on_red = 0
             return False
             

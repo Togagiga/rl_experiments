@@ -8,7 +8,7 @@ from tensorflow.keras.layers import Dense
 from tensorflow.keras.optimizers import Adam
 import matplotlib.pyplot as plt
 
-env = Game()
+env = Game()    # initialising environment
 
 
 ### NOTE ###
@@ -48,6 +48,9 @@ def train_AI(episode):
 		for i in range(max_steps):
 			action = random.randint(0,4)
 			reward, next_state, done = env.step(action)
+			print(f"Step Reward: {reward}")
+			print(f"State: {state}")
+			print(f"Done: {done}")
 			score += reward
 			state = next_state
 			if done:
@@ -60,6 +63,7 @@ def train_AI(episode):
 episodes = 3
 loss = train_AI(episodes)
 plt.plot(range(episodes), loss)
+plt.title("Learning of AI in racecar_env")
 plt.xlabel("episode")
 plt.ylabel("loss")
 plt.show()
