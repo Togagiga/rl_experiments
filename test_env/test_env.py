@@ -123,7 +123,7 @@ class Car():
 		pg.display.update()
 
 
-# env = Car()
-# while env.done == False:
-# 	reward, state, done = env.step(random.randint(0,2))
-# 	print(f"Reward: {reward}")
+env = Car()
+while env.done == False:
+	reward, state, done = env.step(random.randint(0,2))
+	print(f"Reward: {reward}")
