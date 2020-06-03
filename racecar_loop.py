@@ -7,7 +7,7 @@ import time
 
 play = True
 size = width, height = 1200, 1200                                    # size of window
-car_width, car_height = 50, 100                                      # size of car
+car_width, car_height = 25, 50                                      # size of car
 
 vel_inc = 0.4
 theta_inc = 4
@@ -143,6 +143,41 @@ class Car():
 
         return round(sensor_read)
 
+### function to produce drag effect ###
+def drag(vel):
+    if vel >= 0: 
+        vel -= drag_const*np.square(vel)  
+    else:
+        vel += drag_const*np.square(vel)
+        
+    return vel
+
+
+def controls():
+    keys = pg.key.get_pressed()     
+
+    if keys[pg.K_UP] and keys[pg.K_LEFT]:
+        car.vel += vel_inc
+        car.theta += theta_inc
+    elif keys[pg.K_UP] and keys[pg.K_RIGHT]:
+        car.vel += vel_inc
+        car.theta -= theta_inc
+    elif keys[pg.K_DOWN] and keys[pg.K_LEFT]:
+        car.vel -= vel_inc
+        car.theta += theta_inc
+    elif keys[pg.K_DOWN] and keys[pg.K_RIGHT]:
+        car.vel -= vel_inc
+        car.theta -= theta_inc
+    elif keys[pg.K_DOWN]:
+        car.vel -= vel_inc
+    elif keys[pg.K_LEFT]:
+        car.theta += theta_inc
+    elif keys[pg.K_RIGHT]:
+        car.theta -= theta_inc
+    elif keys[pg.K_UP]:
+        car.vel += vel_inc
+    
+
 
 def redrawGameWindow():
     race_map.draw()
@@ -166,40 +201,14 @@ def resetGame():
     car_img = pg.transform.scale(car_img, (car_width,car_height))        # scaling car image
     return win, car, race_map, run, car_img
 
+
+######################## MAIN GAME LOOP ########################
 def playGame(run, play):
     while run:
         clock.tick(27)                                              # 27 frames per second
 
-
-        keys = pg.key.get_pressed()     
-
-        if keys[pg.K_UP] and keys[pg.K_LEFT]:
-            car.vel += vel_inc
-            car.theta += theta_inc
-        elif keys[pg.K_UP] and keys[pg.K_RIGHT]:
-            car.vel += vel_inc
-            car.theta -= theta_inc
-        elif keys[pg.K_DOWN] and keys[pg.K_LEFT]:
-            car.vel -= vel_inc
-            car.theta += theta_inc
-        elif keys[pg.K_DOWN] and keys[pg.K_RIGHT]:
-            car.vel -= vel_inc
-            car.theta -= theta_inc
-        elif keys[pg.K_DOWN]:
-            car.vel -= vel_inc
-        elif keys[pg.K_LEFT]:
-            car.theta += theta_inc
-        elif keys[pg.K_RIGHT]:
-            car.theta -= theta_inc
-        elif keys[pg.K_UP]:
-            car.vel += vel_inc
-        
-        ### function to produce drag effect ###
-        if car.vel >= 0: 
-            car.vel -= drag_const*np.square(car.vel)  
-        else:
-            car.vel += drag_const*np.square(car.vel)
-        
+        controls()        #registers key strokes 
+        car.vel = drag(car.vel) #call drag function
         redrawGameWindow()
 
         if not car.checkLegalMove(car.vel, car.theta):             # checks whether car is on road or not
