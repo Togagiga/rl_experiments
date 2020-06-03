@@ -156,8 +156,6 @@ class Car():
         centre_x = self.x - (img_check.get_rect().width - car_width)/2 + centre[0]                             # centre of car image in x
                    
         centre_y = self.y - (img_check.get_rect().height - car_height)/2 + centre[1]                           # centre of car image in y
-        
-
                                  
 
         ### Obstacle Detection ###
@@ -175,16 +173,16 @@ class Car():
             else:
                 pass
 
-            sensorx -= 10*np.sin(self.theta*(2*np.pi)/360 + sensor_angle)                                # next point along line
+            sensorx -= 10*np.sin(self.theta*(2*np.pi)/360 + sensor_angle)                               # next point along line
             sensory -= 10*np.cos(self.theta*(2*np.pi)/360 + sensor_angle)
 
         ### Return Sensor Readings (relative to car) ###
         sensor_read = math.sqrt((centre_x - sensorx)**2 + (centre_y - sensory)**2)                      # distance formula in x
         
         
-        #beam_length_x = centre_x - sensor_read*np.sin(self.theta*(2*np.pi)/360 + sensor_angle)     # length of beam in x
-        #beam_length_y = centre_y - sensor_read*np.cos(self.theta*(2*np.pi)/360 + sensor_angle)                # length of beam in y
-        #pg.draw.line(win, BLUE, (centre_x, centre_y), (beam_length_x, beam_length_y))   # draw beam
+        #beam_length_x = centre_x - sensor_read*np.sin(self.theta*(2*np.pi)/360 + sensor_angle)         # length of beam in x
+        #beam_length_y = centre_y - sensor_read*np.cos(self.theta*(2*np.pi)/360 + sensor_angle)         # length of beam in y
+        #pg.draw.line(win, BLUE, (centre_x, centre_y), (beam_length_x, beam_length_y))                  # draw beam
         
         return round(sensor_read)
 
@@ -267,17 +265,17 @@ def AI():
 ######################## MAIN GAME LOOP ########################
 def playGame(run, play):
     while run:
-        clock.tick(30)                                              # Define frames per second
+        clock.tick(30)                                                                   # Define frames per second
         action = random.randint(0, 4)
-        controls(action)        #registers key strokes 
-        car.vel = drag(car.vel) #call drag function
+        controls(action)                                                                 #registers key strokes 
+        car.vel = drag(car.vel)                                                          #call drag function
         redrawGameWindow()
-        run, car.score = car.checkLegalMove(car.vel, car.theta, car.score)             # checks whether car is on road or not
+        run, car.score = car.checkLegalMove(car.vel, car.theta, car.score)               # checks whether car is on road or not
 
         
 
         print("Score: ",car.score)
-        for event in pg.event.get():                                                       # if exit button is pressed loop breaks
+        for event in pg.event.get():                                                     # if exit button is pressed loop breaks
             if  event.type == pg.QUIT:
                 play = False
                 print('User Quit Game!')

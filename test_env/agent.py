@@ -49,6 +49,10 @@ class DQN():
 
 
 	def replay(self):
+	# Experience Replay function - way of decorrelation states in order they arrive (randomisation)
+	# sample state, reward from experience (memory)
+	# apply stochastic gradient descent update
+	# converge to least squares solution
 
 		if len(self.memory) < self.batch_size:
 			return
@@ -74,7 +78,7 @@ class DQN():
 			targets_fin[i][t] = targets[i]
 
 		# perform gradient descent
-		self.model.fit(states, targets_fin, epochs=1, verbose=0)
+		self.model.fit(states, targets_fin, epochs=1, verbose=0)     # using mean squared error for GD
 		if self.epsilon > self.epsilon_min:
 			self.epsilon *= self.epsilon_decay
 
