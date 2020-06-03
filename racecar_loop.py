@@ -46,14 +46,23 @@ class Map():
         self.map[90:91, 90:110] = 2
         self.map[70:71, 90:110] = 2
         self.map[50:51, 90:110] = 2
-        self.map[30:31, 90:110] = 2
-        
+        self.map[30:31, 90:110] = 2        
         self.map[10:30, 89:90] = 2
         self.map[10:30, 70:71] = 2
         self.map[10:30, 50:51] = 2
-        self.map[10:30, 30:31] = 2
+        self.map[10:30, 30:31] = 2        
+        self.map[35:36, 10:30] = 2        
+        self.map[40:60, 30:31] = 2
+        self.map[40:60, 50:51] = 2        
+        self.map[60:61, 60:80] = 2
+        self.map[80:81, 60:80] = 2        
+        self.map[90:110, 59:60] = 2
+        self.map[90:110, 40:41] = 2
+        self.map[90:110, 20:21] = 2
 
-    def draw(self):
+        
+        
+    def draw(self,win):
 
         for i in range(0, width, self.tilesize):
             for j in range(0, height, self.tilesize):
@@ -90,7 +99,7 @@ class Car():
 
     def checkLegalMove(self, vel, theta, score):
 
-        self.update_pos(vel, theta)
+        #self.update_pos(vel, theta)
         img_check = self.rot_center(car_img, theta)                 # rotating image of car
 
         car_h = img_check.get_rect().height                    # rotated size of car
@@ -118,17 +127,19 @@ class Car():
             
             else:
                 if self.on_red == 1:
-                    score += 1
+                    score += 5
                 self.on_red = 0
             return True, score
             
         
 
     def draw(self):
+        img = self.rot_center(car_img, self.theta)
+        pg.draw.rect(win, GREY, (self.x - (img.get_rect().width - car_width)/2 - 1, self.y - (img.get_rect().height - car_height)/2 - 1, img.get_rect().width + 2, img.get_rect().height + 2))
         self.update_pos(self.vel, self.theta)                  # updating x y coords          
         img = self.rot_center(car_img, self.theta)                  # calls function to rotate image around centre point
         # drawing retangle representing actual car width and height #
-        pg.draw.rect(win, RED, (self.x - (img.get_rect().width - car_width)/2, self.y - (img.get_rect().height - car_height)/2, img.get_rect().width, img.get_rect().height))
+        pg.draw.rect(win, GREY, (self.x - (img.get_rect().width - car_width)/2, self.y - (img.get_rect().height - car_height)/2, img.get_rect().width, img.get_rect().height))
         win.blit(img, (self.x - (img.get_rect().width - car_width)/2, self.y - (img.get_rect().height - car_height)/2)) #subtracting from x and y to ensure smooth rotation
 
 
@@ -145,14 +156,14 @@ class Car():
         centre_x = self.x - (img_check.get_rect().width - car_width)/2 + centre[0]                             # centre of car image in x
                    
         centre_y = self.y - (img_check.get_rect().height - car_height)/2 + centre[1]                           # centre of car image in y
-        beam_length_y = centre_y - sensor_range*np.cos(self.theta*(2*np.pi)/360 + sensor_angle)                # length of beam in y
+        
 
-                                  # draw beam
+                                 
 
         ### Obstacle Detection ###
         sensorx = centre_x
         sensory = centre_y
-        for i in range(int(sensor_range/5)):                                                            # interate from centre of car until beam length reached
+        for i in range(int(sensor_range/10)):                                                            # interate from centre of car until beam length reached
             point = (math.floor(sensorx/Map().tilesize), math.floor(sensory/Map().tilesize))
 
             if point[0] > width/Map().tilesize -1 or point[1] > height/Map().tilesize -1:               # prevent crash of codeif no wall between car and edge of map
@@ -164,16 +175,16 @@ class Car():
             else:
                 pass
 
-            sensorx -= 5*np.sin(self.theta*(2*np.pi)/360 + sensor_angle)                                # next point along line
-            sensory -= 5*np.cos(self.theta*(2*np.pi)/360 + sensor_angle)
+            sensorx -= 10*np.sin(self.theta*(2*np.pi)/360 + sensor_angle)                                # next point along line
+            sensory -= 10*np.cos(self.theta*(2*np.pi)/360 + sensor_angle)
 
         ### Return Sensor Readings (relative to car) ###
         sensor_read = math.sqrt((centre_x - sensorx)**2 + (centre_y - sensory)**2)                      # distance formula in x
         
         
-        beam_length_x = centre_x - sensor_read*np.sin(self.theta*(2*np.pi)/360 + sensor_angle)     # length of beam in x
-        beam_length_y = centre_y - sensor_read*np.cos(self.theta*(2*np.pi)/360 + sensor_angle)                # length of beam in y
-        pg.draw.line(win, BLUE, (centre_x, centre_y), (beam_length_x, beam_length_y))
+        #beam_length_x = centre_x - sensor_read*np.sin(self.theta*(2*np.pi)/360 + sensor_angle)     # length of beam in x
+        #beam_length_y = centre_y - sensor_read*np.cos(self.theta*(2*np.pi)/360 + sensor_angle)                # length of beam in y
+        #pg.draw.line(win, BLUE, (centre_x, centre_y), (beam_length_x, beam_length_y))   # draw beam
         
         return round(sensor_read)
 
@@ -186,7 +197,7 @@ def drag(vel):
         
     return vel
 
-
+### Takes key inputs and translates to change in velocity/angle ###
 def controls():
     keys = pg.key.get_pressed()     
 
@@ -214,7 +225,7 @@ def controls():
 
 
 def redrawGameWindow():
-    race_map.draw()
+    
     car.draw()
 
     car.sensor('FRONT')
@@ -233,6 +244,7 @@ def resetGame():
     pg.display.set_caption('Car Race')
     car = Car()
     race_map = Map()
+    race_map.draw(win)
     run = True
     car_img = pg.image.load('assets/car-top-view.png').convert_alpha()   # loading car image
     car_img = pg.transform.scale(car_img, (car_width,car_height))        # scaling car image
@@ -242,7 +254,7 @@ def resetGame():
 ######################## MAIN GAME LOOP ########################
 def playGame(run, play):
     while run:
-        clock.tick(27)                                              # 27 frames per second
+        clock.tick(30)                                              # 27 frames per second
 
         controls()        #registers key strokes 
         car.vel = drag(car.vel) #call drag function
@@ -257,7 +269,8 @@ def playGame(run, play):
                 play = False
                 print('User Quit Game!')
                 run = False
-        car.score += np.square(car.vel)*0.001
+        car.score += np.power(car.vel,3)*0.0001
+        
     pg.quit()
     return play
 
