@@ -33,10 +33,13 @@ class AI():
 		self.action_space = action_space
 		self.state_space = state_space
 
+		self.model = self.build_model()
+
 	def build_model(self):
 		model = Sequential()
 		# model.add(.......)
 
+		return model
 
 
 def train_AI(episode):
@@ -44,14 +47,15 @@ def train_AI(episode):
 	agent = AI()
 	for e in range(episode):
 		state = env.reset()
-		score = 0              # cumulative reward for episode
-		max_steps = 10000      # up to 10000 frames/episode
+		score = 0                               # cumulative reward for episode
+		max_steps = 10000                       # up to 10000 frames/episode
 		for i in range(max_steps):
 			action = random.randint(0,4)
+			# action = AI()     --------------> need to generate action from AI (agent)
 			reward, next_state, done = env.step(action)
-			#print(f"Step Reward: {reward}")
-			#print(f"State: {state}")
-			#print(f"Done: {done}")
+			# print(f"Step Reward: {reward}")
+			# print(f"State: {state}")
+			# print(f"Done: {done}")
 			score += reward
 			state = next_state
 			if done:
