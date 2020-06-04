@@ -37,7 +37,7 @@ class AI():
 
 	def build_model(self):
 		model = Sequential()
-		# model.add(.......)
+		# model.add(.......)	 
 
 		return model
 

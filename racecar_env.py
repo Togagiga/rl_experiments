@@ -117,8 +117,7 @@ class Car():
 
     def checkLegalMove(self, vel, theta):
 
-        #self.update_pos(vel, theta)
-        img_check = self.rot_center(self.car_img, theta)                 # rotating image of car
+        img_check = self.rot_center(self.car_img, theta)       # rotating image of car
 
         car_h = img_check.get_rect().height                    # rotated size of car
         car_w = img_check.get_rect().width
@@ -126,10 +125,10 @@ class Car():
         check_x = self.x - (car_w - car_width)/2               # position account for car turning
         check_y = self.y - (car_h - car_height)/2
         
-        map_y = math.floor(check_y/self.tilesize)             # position in tiles
+        map_y = math.floor(check_y/self.tilesize)              # position in tiles
         map_x = math.floor(check_x/self.tilesize)
 
-        car_h_tiles = math.ceil(car_h/self.tilesize)          # getting car size in tiles
+        car_h_tiles = math.ceil(car_h/self.tilesize)           # getting car size in tiles
         car_w_tiles = math.ceil(car_w/self.tilesize)
 
         check =  np.argwhere(self.map.map[map_y:map_y + car_h_tiles, map_x:map_x + car_w_tiles] == 0)  # if car is on zeros on map
@@ -151,13 +150,19 @@ class Car():
         
 
     def draw(self):
+        # rotating car image
         img = self.rot_center(self.car_img, self.theta)
+        # blitting over car in previous time step
         pg.draw.rect(self.game.win, GREY, (self.x - (img.get_rect().width - car_width)/2 - 1, self.y - (img.get_rect().height - car_height)/2 - 1, img.get_rect().width + 2, img.get_rect().height + 2))
-        self.update_pos(self.vel, self.theta)                  # updating x y coords          
-        img = self.rot_center(self.car_img, self.theta)                  # calls function to rotate image around centre point
-        # drawing retangle representing actual car width and height #
+        # updating the positon of car for time step
+        self.update_pos(self.vel, self.theta)
+        # rotating car image
+        img = self.rot_center(self.car_img, self.theta)
+        # drawing retangle representing actual car width and height
         pg.draw.rect(self.game.win, GREY, (self.x - (img.get_rect().width - car_width)/2, self.y - (img.get_rect().height - car_height)/2, img.get_rect().width, img.get_rect().height))
+        # blitting car of current time step to game window
         self.game.win.blit(img, (self.x - (img.get_rect().width - car_width)/2, self.y - (img.get_rect().height - car_height)/2)) #subtracting from x and y to ensure smooth rotation
+
 
 
     def sensor(self, sensor_type='FRONT'):
@@ -166,12 +171,11 @@ class Car():
         sensor_dict = {'FRONT':[400, 0], 'LEFT':[300, np.pi/2], 'RIGHT':[300, -np.pi/2], 'F_RIGHT':[300, -np.pi*1/4], 'F_LEFT':[300, np.pi*1/4]}
         sensor_range, sensor_angle = sensor_dict[sensor_type]
 
-        ### Visulisation ###
+        ### Setup of Coordinates ###
         img_check = self.rot_center(self.car_img, self.theta)                                    # rotating original image of car
         centre = img_check.get_rect().center                                           # get centre coords from top corner of car image
 
-        centre_x = self.x - (img_check.get_rect().width - car_width)/2 + centre[0]                             # centre of car image in x
-                   
+        centre_x = self.x - (img_check.get_rect().width - car_width)/2 + centre[0]                             # centre of car image in x          
         centre_y = self.y - (img_check.get_rect().height - car_height)/2 + centre[1]                           # centre of car image in y
                                  
 
@@ -198,10 +202,10 @@ class Car():
         ### Return Sensor Readings (relative to car) ###
         sensor_read = math.sqrt((centre_x - sensorx)**2 + (centre_y - sensory)**2)                      # distance formula in x
         
-        
-        #beam_length_x = centre_x - sensor_read*np.sin(self.theta*(2*np.pi)/360 + sensor_angle)         # length of beam in x
-        #beam_length_y = centre_y - sensor_read*np.cos(self.theta*(2*np.pi)/360 + sensor_angle)         # length of beam in y
-        #pg.draw.line(win, BLUE, (centre_x, centre_y), (beam_length_x, beam_length_y))                  # draw beam
+        ### Visualisation ###
+        # beam_length_x = centre_x - sensor_read*np.sin(self.theta*(2*np.pi)/360 + sensor_angle)         # length of beam in x
+        # beam_length_y = centre_y - sensor_read*np.cos(self.theta*(2*np.pi)/360 + sensor_angle)         # length of beam in y
+        # pg.draw.line(win, BLUE, (centre_x, centre_y), (beam_length_x, beam_length_y))                  # draw beam
         
         return round(sensor_read)
 
@@ -233,16 +237,17 @@ class Game():
         self.map.draw()
 
         state = [self.car.sensor("LEFT"),
-        self.car.sensor("F_LEFT"),
-        self.car.sensor("FRONT"),
-        self.car.sensor("F_RIGHT"),
-        self.car.sensor("RIGHT"),
-        self.car.vel]
+                self.car.sensor("F_LEFT"),
+                self.car.sensor("FRONT"),
+                self.car.sensor("F_RIGHT"),
+                self.car.sensor("RIGHT"),
+                self.car.vel]
 
         return state
 
 
-    def controls(self, action):         # being called in step method
+    # being called in step method
+    def controls(self, action):
         # potential to add reward for different types of actions
 
         if action == 0:
@@ -263,7 +268,8 @@ class Game():
 
 
 
-    def redrawGameWindow(self):     # being called in run_frame method
+    # being called in run_frame method
+    def redrawGameWindow(self):
         self.done = False
         self.car.draw()
         pg.display.update()
@@ -282,17 +288,19 @@ class Game():
                 self.car.sensor("F_RIGHT"),
                 self.car.sensor("RIGHT"),
                 self.car.vel]
+
         return self.reward, state, self.done
 
 
-    def run_frame(self):    # being called in step method
+    # being called in step method
+    def run_frame(self):
 
-        for event in pg.event.get():                                                     # if exit button is pressed loop breaks
+        for event in pg.event.get():                                                    # if exit button is pressed loop breaks
             if event.type == pg.QUIT:
                self.done = True
         self.redrawGameWindow()
         self.done = self.car.checkLegalMove(self.car.vel, self.car.theta)               # checks whether car is on road or not
-        self.reward += np.power(self.car.vel,3)*0.0001
+        self.reward += np.power(self.car.vel,3)*0.0001                                  # add to reward for time step, reward for vel
         self.clock.tick(30)
 
 
