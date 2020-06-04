@@ -306,5 +306,3 @@ class Game():
 #     print(f"State: {state}")
 #     print(f"Done: {done}")
 # print(f"CUMULATIVE REWARD: {total_reward}")    # total reward of episode
-
-# env.reset()
