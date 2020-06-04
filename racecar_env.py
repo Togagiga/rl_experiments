@@ -182,7 +182,7 @@ class Car():
         ### Obstacle Detection ###
         sensorx = centre_x
         sensory = centre_y
-        for i in range(int(sensor_range/10)):                                                            # interate from centre of car until beam length reached
+        for i in range(int(sensor_range/5)):                                                            # interate from centre of car until beam length reached
             point = (math.floor(sensorx/self.tilesize), math.floor(sensory/self.tilesize))
 
             if point[0] > width/self.tilesize -1 or point[1] > height/self.tilesize -1:               # prevent crash of codeif no wall between car and edge of map
@@ -196,8 +196,8 @@ class Car():
             else:
                 pass
 
-            sensorx -= 10*np.sin(self.theta*(2*np.pi)/360 + sensor_angle)                               # next point along line
-            sensory -= 10*np.cos(self.theta*(2*np.pi)/360 + sensor_angle)
+            sensorx -= 5*np.sin(self.theta*(2*np.pi)/360 + sensor_angle)                               # next point along line
+            sensory -= 5*np.cos(self.theta*(2*np.pi)/360 + sensor_angle)
 
         ### Return Sensor Readings (relative to car) ###
         sensor_read = math.sqrt((centre_x - sensorx)**2 + (centre_y - sensory)**2)                      # distance formula in x
@@ -224,9 +224,16 @@ class Game():
         self.map.draw()
         self.reward = 0
         self.done = False
+        self.quit = False
 
 
     def reset(self):
+        if self.quit == True:              # allows to quit all episodes by quitting game window
+        # none of the values are reset, so once current episode finishes, all following episodes
+        # will be in grass and thus only perform one loop before also terminating
+        # Not the most elegent solution but it quits the training process a lot faster
+            return
+
         self.done = False
         self.car.x = 1000
         self.car.y = 1000
@@ -298,6 +305,9 @@ class Game():
         for event in pg.event.get():                                                    # if exit button is pressed loop breaks
             if event.type == pg.QUIT:
                self.done = True
+               self.quit = True                   # quit all episodes
+               return self.done, self.quit
+
         self.redrawGameWindow()
         self.done = self.car.checkLegalMove(self.car.vel, self.car.theta)               # checks whether car is on road or not
         self.reward += np.power(self.car.vel,3)*0.0001                                  # add to reward for time step, reward for vel
@@ -305,12 +315,15 @@ class Game():
 
 
 
-# env = Game()
-# total_reward = 0
-# while env.done == False:
-#     reward, state, done = env.step(random.randint(0,4))    # each time step returns rewards, states, done
-#     total_reward += reward
-#     print(f"Step Reward: {reward}")
-#     print(f"State: {state}")
-#     print(f"Done: {done}")
-# print(f"CUMULATIVE REWARD: {total_reward}")    # total reward of episode
+
+
+if __name__ == "__main__":
+    env = Game()
+    total_reward = 0
+    while env.done == False:
+        reward, state, done = env.step(random.randint(0,4))    # each time step returns rewards, states, done
+        total_reward += reward
+        print(f"Step Reward: {reward}")
+        print(f"State: {state}")
+        print(f"Done: {done}")
+    print(f"CUMULATIVE REWARD: {total_reward}")    # total reward of episode

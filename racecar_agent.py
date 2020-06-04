@@ -62,14 +62,18 @@ def train_AI(episode):
 				print("--> episode: {}/{}, score: {}".format(e+1, episode, score))
 				break
 		loss.append(score)
+	if env.quit == True:
+		print("----------User Quit Training---------")
 	return loss
 
 
-episodes = 3
-loss = train_AI(episodes)
-plt.plot(range(episodes), loss)
-plt.title("Learning of AI in racecar_env")
-plt.xticks(range(episodes))
-plt.xlabel("episode")
-plt.ylabel("loss")
-plt.show()
+
+if __name__ == "__main__":
+	episodes = 50
+	loss = train_AI(episodes)
+	plt.plot(range(episodes), loss)
+	plt.title("Learning of AI in racecar_env")
+	#plt.xticks(range(episodes), range(1, episodes + 1))
+	plt.xlabel("episode")
+	plt.ylabel("loss")
+	plt.show()
