@@ -1,4 +1,4 @@
-[![license](https://img.shields.io/github/license/Togagiga/rl_experiments.svg?maxAge=2592000)]()
+[![license](https://img.shields.io/github/license/Togagiga/rl_experiments.svg)](https://opensource.org/licenses/MIT)
 
 # RL EXPERIMENTS
 
