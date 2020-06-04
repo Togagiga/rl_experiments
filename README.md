@@ -1,3 +1,5 @@
+[![license](https://img.shields.io/github/license/Togagiga/rl_experiments)]()
+
 # RL EXPERIMENTS
 
 An attempt at utilising reinforcement learning (RL) for a simple 2D game.
