@@ -29,17 +29,45 @@ defining two nested for loop:
 
 
 class AI():
-	def __init__(self, action_space = 5, state_space = 6):
+	def __init__(self, action_space = 5, state_space = 6, no_models):
 		self.action_space = action_space
 		self.state_space = state_space
 
-		self.model = self.build_model()
+		# self.models = []
+		# for i in range(no_models+1):
+		# 	self.models.append(self.build_model())
+
+		self.model = build_model()
+
 
 	def build_model(self):
 		model = Sequential()
-		# model.add(.......)	 
+		model.add(Dense(30, activation = "relu", input_shape(6,1)))
+		model.add(Dense(15, activation = "relu"))
+		model.add(Dense(5, activation = "softmax"))
 
 		return model
+
+
+# run whole gen then call choose_best
+	def choose_best():
+		# if prev_score < cur_score:
+			# model.save_weighs()
+		pass
+
+	def next_gen():
+		# new_weights = np.sample(data, normal)
+		# new_model = old_model.load_weight(new_weights)
+
+		pass
+
+'''
+figure out how to randomise model weight for inilialising first gen
+
+be able to save weight of best models  (weight = model.save_weight())
+
+use a normal distrib on weight to make generation 2....-> for loop to sample from normal distrib for each weight???
+'''
 
 
 def train_AI(episode):
@@ -52,7 +80,13 @@ def train_AI(episode):
 		for i in range(max_steps):
 			action = random.randint(0,4)
 			# action = AI()     --------------> need to generate action from AI (agent)
+			if i == 0:
+				action = 0
+
 			reward, next_state, done = env.step(action)
+			train(model)
+			action = model.evaluate(next_state)
+
 			# print(f"Step Reward: {reward}")
 			# print(f"State: {state}")
 			# print(f"Done: {done}")
