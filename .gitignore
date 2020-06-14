@@ -7,3 +7,4 @@
 /test_env/test.py
 /__pycache__
 *h5
+*.ipynb_checkpoints
