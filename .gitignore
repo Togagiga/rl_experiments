@@ -6,5 +6,4 @@
 /test_env/*.txt
 /test_env/test.py
 /__pycache__
-*.ipynb
 *h5
