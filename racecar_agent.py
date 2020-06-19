@@ -44,6 +44,7 @@ class AI():
     def __init__(self, action_space = 5, state_space = 6):
         self.action_space = action_space
         self.state_space = state_space
+        self.std_deviation = 0.1
 
         self.model = self.build_model()                               # creating model
 
@@ -61,16 +62,6 @@ class AI():
         return np.argmax(prediction_values[0])
 
 
-
-    def get_best_model():    # performance measure (fitness calculation) for current generation
-
-        # if prev_score < cur_score:
-            # model.save_weighs()
-        pass
-
-        return best_model
-
-
     def get_child(self, best_model):
 
         child_model = self.build_model()     # new model to save new weights to
@@ -82,7 +73,7 @@ class AI():
 
             for i in range(len(weights[0])):
                 for j in range(len(weights[0][0])):
-                    child_weights[0][i][j] = np.random.normal(weights[0][i][j], 0.1, 1)   # writing new weights for child
+                    child_weights[0][i][j] = np.random.normal(weights[0][i][j], self.std_deviation, 1)   # writing new weights for child
 
             child_model.layers[l].set_weights(child_weights)
 
@@ -91,7 +82,7 @@ class AI():
 
 
 
-def train_AI(generations, generation_size = 3):
+def train_AI(generations, generation_size = 10, time_steps = 300):
 
     loss = []
     agent = AI()
@@ -102,18 +93,17 @@ def train_AI(generations, generation_size = 3):
         generation_loss = []
         models = []
 
-        for model in range(generation_size):            # create offspring from best_model
+        for model in range(generation_size):                 # create offspring from best_model
             models.append(agent.get_child(best_model))
 
-        print(models)
 
         for model in range(generation_size):
 
-            state = env.reset()
+            state = env.reset(generation+1, model+1)
             state = np.reshape(state, (1,6))                 # initial state (reshape needed for NN)
             score = 0                                        # cumulative reward for episode
             agent.model = models[model]
-            max_steps = 300
+            max_steps = time_steps
 
             for i in range(max_steps):
 
@@ -133,9 +123,24 @@ def train_AI(generations, generation_size = 3):
                     break
 
             generation_loss.append(score)
-            max_gen_loss = np.argmax(generation_loss)
 
-            best_model = models[max_gen_loss]           # reassigning best_model
+
+        max_gen_loss = np.argmax(generation_loss)
+
+        if generation == 0:                               # for first gen only
+            best_model = models[max_gen_loss]           
+
+        elif generation_loss[max_gen_loss] > loss[-1]:    # check whether new gen is better than best_model
+            best_model = models[max_gen_loss]             # reassigning best_model based on highest loss
+            # if agent.std_deviation > 0.1:
+            #     agent.std_deviation = 0.1
+            print("good boiiii")
+            print(agent.std_deviation)
+
+        else:
+            generation_loss[max_gen_loss] = loss[-1]      # if not add previous loss to loss
+            # if agent.std_deviation < 0.3:
+            #     agent.std_deviation += 0.1
 
 
         loss.append(generation_loss[max_gen_loss])
@@ -151,12 +156,13 @@ def train_AI(generations, generation_size = 3):
 
 if __name__ == "__main__":
 
-    generations = 3
-    loss = train_AI(generations)
+    generations = 5
+    generation_size = 3
+    loss = train_AI(generations, generation_size)
     print(loss)
 
     # plotting
-    plt.plot(range(generations), loss)
+    plt.plot(range(1, generations+1), loss)
     plt.title("Learning of AI in racecar_env")
     plt.xlabel("generation")
     plt.ylabel("loss")

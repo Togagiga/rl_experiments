@@ -14,13 +14,21 @@ An attempt at utilising reinforcement learning (RL) for a simple 2D game.
 - [x] Make the basic racecar environment
 - [ ] Make simple agent: Current plan is to use a genetic algorithm
 
-### Genectic Algorithm Basic Flowchart
+#### Genectic Algorithm Basic Flowchart
 
 <p align="center">
 	<img src="assets/GA-flowchart.png" />
 </p>
 
+#### Traditional Agents (Q-Learning/Policy Learning)
+
+<p align="center">
+	<img src="assets/rl-loop.png" />
+</p>
+
 ## FUTURE PROJECTS	
 
 - [ ] Use pixel data instead of "sensor data" for algorithm
-- [ ] Experiments with different agent architectures
+- [ ] Try more standard Rl approaches for agent
+- [ ] Try some hybrid of GA and Q-Learning/Policy Learning
+- [ ] Compare agents

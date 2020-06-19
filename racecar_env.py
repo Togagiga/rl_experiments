@@ -226,8 +226,15 @@ class Game():
         self.done = False
         self.quit = False
 
+        self.generation = 0
+        self.model = 1
 
-    def reset(self):
+
+    def reset(self, generation, model):
+
+        self.generation = generation
+        self.model = model
+
         if self.quit == True:              # allows to quit all episodes by quitting game window
         # none of the values are reset, so once current episode finishes, all following episodes
         # will be in grass and thus only perform one loop before also terminating
@@ -253,8 +260,17 @@ class Game():
         return state
 
 
+    def score(self):
+        font = pg.font.SysFont(None, 25)
+        text_gen = font.render("Generation: "+str(self.generation), True, (0, 0, 0))
+        text_model = font.render("Model: "+str(self.model), True, (0, 0, 0))
+        self.win.blit(text_gen, (10, 10))
+        self.win.blit(text_model, (10, 30))
+
+
     # being called in step method
     def controls(self, action):
+
         # potential to add reward for different types of actions
         # right hand coord-sys: -theta==clockwise, +theta==anti-clockwise
 
@@ -278,12 +294,15 @@ class Game():
 
     # being called in run_frame method
     def redrawGameWindow(self):
+
         self.done = False
         self.car.draw()
+        self.score()
         pg.display.update()
 
 
     def step(self, action):
+
         self.reward = 0
         self.done = False
         self.controls(action)
@@ -319,6 +338,7 @@ class Game():
 
 
 if __name__ == "__main__":
+
     env = Game()
     total_reward = 0
     while env.done == False:
