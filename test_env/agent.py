@@ -89,6 +89,7 @@ def train_dpn(episode):
 	for e in range(episode):
 		state = env.reset()
 		state = np.reshape(state, (1,4))
+
 		score = 0
 		max_steps = 10000                     # if = 1000 does not go beyond scor:14
 		for i in range(max_steps):
@@ -107,7 +108,7 @@ def train_dpn(episode):
 
 if __name__ == "__main__":
 
-	ep = 100
+	ep = 2
 	loss = train_dpn(ep)
 	plt.plot([i for i in range(ep)], loss)
 	plt.xlabel("episodes")

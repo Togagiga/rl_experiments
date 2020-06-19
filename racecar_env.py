@@ -256,20 +256,21 @@ class Game():
     # being called in step method
     def controls(self, action):
         # potential to add reward for different types of actions
+        # right hand coord-sys: -theta==clockwise, +theta==anti-clockwise
 
-        if action == 0:
+        if action == 0:                               # forward + left
             self.car.vel += vel_inc
             self.car.vel = self.car.drag(self.car.vel)   
             self.car.theta += theta_inc
-        elif action == 1:
+        elif action == 1:                             # forward + right
             self.car.vel += vel_inc
             self.car.vel = self.car.drag(self.car.vel)   
             self.car.theta -= theta_inc
-        elif action == 2:
+        elif action == 2:                             # left
             self.car.theta += theta_inc
-        elif action == 3:
+        elif action == 3:                             # right
             self.car.theta -= theta_inc
-        elif action == 4:
+        elif action == 4:                             # forward
             self.car.vel += vel_inc
             self.car.vel = self.car.drag(self.car.vel)   
 
@@ -310,7 +311,7 @@ class Game():
 
         self.redrawGameWindow()
         self.done = self.car.checkLegalMove(self.car.vel, self.car.theta)               # checks whether car is on road or not
-        self.reward += np.power(self.car.vel,3)*0.0001                                  # add to reward for time step, reward for vel
+        self.reward += np.power(self.car.vel,3)*0.0001         # velocity reward                               # add to reward for time step, reward for vel
         self.clock.tick(30)
 
 

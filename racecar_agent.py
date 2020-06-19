@@ -1,5 +1,4 @@
 from racecar_env import Game
-
 import random
 import numpy as np
 import tensorflow as tf
@@ -12,102 +11,153 @@ env = Game()    # initialising environment
 
 
 ### NOTE ###
+'''
+Genetic Algorithm (general procedure):
+
+    Makes first generation of NN, using the same architecure but different weights
+
+    Performance measure find the best NN after env.done == True
+
+    Best NN is used to create the next generation    (May be necessary to use the best 3...)
+
+    Weights of next generation are found by using the weights as the mean of a normal
+    distribution and sampling from it
+
+    Next generation is evaluated, best if chosen
+
+
+ACTIONS:
+    0 == forward + left
+    1 == forward + right
+    2 == left
+    3 == right
+    4 == forward
+
+STATE:
+    [L_sensor, FL_sensor, F_sensor, FR_sensor, R_sensor, car.vel]
 
 '''
-AI class is doing nothing at this point
-
-defining two nested for loop:
-	outer loops through episodes:
-
-		env.reset() called
-
-	inner loops through frames by calling env.step():
-
-		input to step() is randomly generated integer, i~[0,4] (sampled from the closed interval 0 to 4)
-		cumulative reward (score) represents loss of episode
-'''
+############
 
 
 class AI():
-	def __init__(self, action_space = 5, state_space = 6, no_models):
-		self.action_space = action_space
-		self.state_space = state_space
+    def __init__(self, action_space = 5, state_space = 6):
+        self.action_space = action_space
+        self.state_space = state_space
 
-		# self.models = []
-		# for i in range(no_models+1):
-		# 	self.models.append(self.build_model())
-
-		self.model = build_model()
+        self.model = self.build_model()                               # creating model
 
 
-	def build_model(self):
-		model = Sequential()
-		model.add(Dense(30, activation = "relu", input_shape(6,1)))
-		model.add(Dense(15, activation = "relu"))
-		model.add(Dense(5, activation = "softmax"))
+    def build_model(self):
+        model = Sequential()
+        model.add(Dense(32, activation = "relu", input_shape=(self.state_space, )))
+        model.add(Dense(16, activation = "relu"))
+        model.add(Dense(self.action_space, activation = "softmax"))
 
-		return model
+        return model
 
-
-# run whole gen then call choose_best
-	def choose_best():
-		# if prev_score < cur_score:
-			# model.save_weighs()
-		pass
-
-	def next_gen():
-		# new_weights = np.sample(data, normal)
-		# new_model = old_model.load_weight(new_weights)
-
-		pass
-
-'''
-figure out how to randomise model weight for inilialising first gen
-
-be able to save weight of best models  (weight = model.save_weight())
-
-use a normal distrib on weight to make generation 2....-> for loop to sample from normal distrib for each weight???
-'''
+    def get_action(self, state):      # return action from model
+        prediction_values = self.model.predict(state, batch_size=1)
+        return np.argmax(prediction_values[0])
 
 
-def train_AI(episode):
-	loss = []
-	agent = AI()
-	for e in range(episode):
-		state = env.reset()
-		score = 0                               # cumulative reward for episode
-		max_steps = 10000                       # up to 10000 frames/episode
-		for i in range(max_steps):
-			action = random.randint(0,4)
-			# action = AI()     --------------> need to generate action from AI (agent)
-			if i == 0:
-				action = 0
 
-			reward, next_state, done = env.step(action)
-			train(model)
-			action = model.evaluate(next_state)
+    def get_best_model():    # performance measure (fitness calculation) for current generation
 
-			# print(f"Step Reward: {reward}")
-			# print(f"State: {state}")
-			# print(f"Done: {done}")
-			score += reward
-			state = next_state
-			if done:
-				print("--> episode: {}/{}, score: {}".format(e+1, episode, score))
-				break
-		loss.append(score)
-	if env.quit == True:
-		print("----------User Quit Training---------")
-	return loss
+        # if prev_score < cur_score:
+            # model.save_weighs()
+        pass
+
+        return best_model
+
+
+    def get_child(self, best_model):
+
+        child_model = self.build_model()     # new model to save new weights to
+
+        for l in range(len(best_model.layers)):
+
+            weights = np.array(best_model.layers[l].get_weights())
+            child_weights = weights
+
+            for i in range(len(weights[0])):
+                for j in range(len(weights[0][0])):
+                    child_weights[0][i][j] = np.random.normal(weights[0][i][j], 0.1, 1)   # writing new weights for child
+
+            child_model.layers[l].set_weights(child_weights)
+
+        return child_model
+
+
+
+
+def train_AI(generations, generation_size = 3):
+
+    loss = []
+    agent = AI()
+    best_model = agent.model
+
+    for generation in range(generations):
+
+        generation_loss = []
+        models = []
+
+        for model in range(generation_size):            # create offspring from best_model
+            models.append(agent.get_child(best_model))
+
+        print(models)
+
+        for model in range(generation_size):
+
+            state = env.reset()
+            state = np.reshape(state, (1,6))                 # initial state (reshape needed for NN)
+            score = 0                                        # cumulative reward for episode
+            agent.model = models[model]
+            max_steps = 300
+
+            for i in range(max_steps):
+
+                action = agent.get_action(state)             # action from agent
+                # print(f"Action Generated: {action}")
+                reward, next_state, done = env.step(action)
+                next_state = np.reshape(next_state, (1,6))
+                score += reward
+                state = next_state
+                
+                # print(f"Step Reward: {reward}")
+                # print(f"State: {state}")
+                # print(f"Done: {done}\n")
+
+                if done:
+                    print("--> model: {}/{}, score: {}".format(model+1, generation_size, score))
+                    break
+
+            generation_loss.append(score)
+            max_gen_loss = np.argmax(generation_loss)
+
+            best_model = models[max_gen_loss]           # reassigning best_model
+
+
+        loss.append(generation_loss[max_gen_loss])
+
+
+        if env.quit == True:
+            print("----------User Quit Training---------")
+    return loss
+
+
 
 
 
 if __name__ == "__main__":
-	episodes = 50
-	loss = train_AI(episodes)
-	plt.plot(range(episodes), loss)
-	plt.title("Learning of AI in racecar_env")
-	#plt.xticks(range(episodes), range(1, episodes + 1))
-	plt.xlabel("episode")
-	plt.ylabel("loss")
-	plt.show()
+
+    generations = 3
+    loss = train_AI(generations)
+    print(loss)
+
+    # plotting
+    plt.plot(range(generations), loss)
+    plt.title("Learning of AI in racecar_env")
+    plt.xlabel("generation")
+    plt.ylabel("loss")
+    plt.show()
