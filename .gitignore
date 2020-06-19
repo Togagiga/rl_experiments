@@ -1,7 +1,7 @@
 /venv
 *.sublime-build
 *.pdf
-*.png
+test_env/*.png
 */__pycache__
 /test_env/*.txt
 /test_env/test.py
