@@ -249,6 +249,7 @@ class Game():
         self.car.on_red = 0
         self.reward = 0
         self.map.draw()
+        self.score()
 
         state = [self.car.sensor("LEFT"),
                 self.car.sensor("F_LEFT"),
@@ -296,7 +297,6 @@ class Game():
 
         self.done = False
         self.car.draw()
-        self.score()
         pg.display.update()
 
 
