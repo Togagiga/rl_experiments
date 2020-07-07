@@ -86,7 +86,7 @@ def train_AI(generations, generation_size = 10, time_steps = 300):
 
     loss = []
     agent = AI()
-    best_model = agent.model
+    best_model = agent.model                                 # creating initial model
 
     for generation in range(generations):
 
@@ -119,7 +119,7 @@ def train_AI(generations, generation_size = 10, time_steps = 300):
                 # print(f"Done: {done}\n")
 
                 if done:
-                    print("--> model: {}/{}, score: {}".format(model+1, generation_size, score))
+                    print("--> generation: {}, model: {}/{}, score: {}".format(generation+1, model+1, generation_size, round(score, 3)))
                     break
 
             generation_loss.append(score)
@@ -128,7 +128,7 @@ def train_AI(generations, generation_size = 10, time_steps = 300):
         max_gen_loss = np.argmax(generation_loss)
 
         if generation == 0:                               # for first gen only
-            best_model = models[max_gen_loss]           
+            best_model = models[max_gen_loss]             # reassigns best model        
 
         elif generation_loss[max_gen_loss] > loss[np.argmax(loss)]:    # check whether new gen is better than best_model
             best_model = models[max_gen_loss]             # reassigning best_model based on highest loss
@@ -158,7 +158,7 @@ if __name__ == "__main__":
     generations = 5
     generation_size = 3
     loss = train_AI(generations, generation_size)
-    print(loss)
+    print(f"Generation Loss: {loss}")
 
     # plotting
     plt.plot(range(1, generations+1), loss)
