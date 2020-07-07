@@ -130,17 +130,16 @@ def train_AI(generations, generation_size = 10, time_steps = 300):
         if generation == 0:                               # for first gen only
             best_model = models[max_gen_loss]           
 
-        elif generation_loss[max_gen_loss] > loss[-1]:    # check whether new gen is better than best_model
+        elif generation_loss[max_gen_loss] > loss[np.argmax(loss)]:    # check whether new gen is better than best_model
             best_model = models[max_gen_loss]             # reassigning best_model based on highest loss
             # if agent.std_deviation > 0.1:
-            #     agent.std_deviation = 0.1
-            print("good boiiii")
-            print(agent.std_deviation)
+            #     agent.std_deviation -= 0.1
 
         else:
-            generation_loss[max_gen_loss] = loss[-1]      # if not add previous loss to loss
+            # generation_loss[max_gen_loss] = loss[-1]      # if not add previous best loss to loss
             # if agent.std_deviation < 0.3:
             #     agent.std_deviation += 0.1
+            pass
 
 
         loss.append(generation_loss[max_gen_loss])

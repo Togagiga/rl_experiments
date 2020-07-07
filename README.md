@@ -4,12 +4,12 @@
 
 An attempt at utilising reinforcement learning (RL) for a simple 2D game.
 
-##  test_env and test_agent
+## test_env and test_agent
 
-- [x] Simple game written as environment (Input: [Action], Output: [State, Reward])
+- [x] Simple game written as environment
 - [x] Simple agent based on Q-Learning with Experience Replay
 
-## TODO: racecar_env and racecar_agent
+## racecar_env and racecar_agent
 
 - [x] Make the basic racecar environment
 - [ ] Make simple agent: Current plan is to use a genetic algorithm

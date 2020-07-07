@@ -15,14 +15,14 @@ import math
 import time
 import random
 
-size = width, height = 1200, 1200                                   # size of window
-car_width, car_height = 25, 50                                      # size of car
+size = width, height = 1200, 1200                              # size of window
+car_width, car_height = 25, 50                                 # size of car
 
 vel_inc = 0.4
 theta_inc = 4
 drag_const = 0.001
 
-GREEN = (0, 138, 55)                                                 # RGB Colours
+GREEN = (0, 138, 55)                                           # RGB Colours
 GREY = (67, 67, 67)
 RED = (253, 8, 8)
 BLUE = (0, 188, 255)
@@ -93,7 +93,7 @@ class Car():
         self.on_red = on_red
 
         self.car_img = pg.image.load('assets/car-top-view.png').convert_alpha()   # loading car image
-        self.car_img = pg.transform.scale(self.car_img, (car_width,car_height))        # scaling car image
+        self.car_img = pg.transform.scale(self.car_img, (car_width,car_height))   # scaling car image
 
     def update_pos(self, vel, theta):
         self.y -= np.cos(theta*(2*np.pi)/360)*vel              # calculates new x,y coordinates based on current x,y,vel,theta 
@@ -101,7 +101,7 @@ class Car():
 
     def rot_center(self, img, theta):
 
-        loc = img.get_rect().center                                # rot_image is not defined 
+        loc = img.get_rect().center                            # rot_image is not defined 
         rot_sprite = pg.transform.rotate(img, theta)
         rot_sprite.get_rect().center = loc
         return rot_sprite
@@ -172,26 +172,26 @@ class Car():
         sensor_range, sensor_angle = sensor_dict[sensor_type]
 
         ### Setup of Coordinates ###
-        img_check = self.rot_center(self.car_img, self.theta)                                    # rotating original image of car
-        centre = img_check.get_rect().center                                           # get centre coords from top corner of car image
+        img_check = self.rot_center(self.car_img, self.theta)                                          # rotating original image of car
+        centre = img_check.get_rect().center                                                           # get centre coords from top corner of car image
 
-        centre_x = self.x - (img_check.get_rect().width - car_width)/2 + centre[0]                             # centre of car image in x          
-        centre_y = self.y - (img_check.get_rect().height - car_height)/2 + centre[1]                           # centre of car image in y
+        centre_x = self.x - (img_check.get_rect().width - car_width)/2 + centre[0]                     # centre of car image in x          
+        centre_y = self.y - (img_check.get_rect().height - car_height)/2 + centre[1]                   # centre of car image in y
                                  
 
         ### Obstacle Detection ###
         sensorx = centre_x
         sensory = centre_y
-        for i in range(int(sensor_range/5)):                                                            # interate from centre of car until beam length reached
+        for i in range(int(sensor_range/5)):                                                           # interate from centre of car until beam length reached
             point = (math.floor(sensorx/self.tilesize), math.floor(sensory/self.tilesize))
 
-            if point[0] > width/self.tilesize -1 or point[1] > height/self.tilesize -1:               # prevent crash of codeif no wall between car and edge of map
+            if point[0] > width/self.tilesize -1 or point[1] > height/self.tilesize -1:                # prevent crash of codeif no wall between car and edge of map
                 sensor_read = sensor_range
                 break
             
-            # self.map.map is because of terrible naming of the map instance being passed into car class in __init__
-            # cannot be arsed changing it...sorry
-            if self.map.map[point[1],point[0]] == 0:                                                  # check current point along beam again map
+            # self.map.map is because of terrible naming of the map instance being passed 
+            # into car class in __init__ BUT cannot be arsed changing it...sorry
+            if self.map.map[point[1],point[0]] == 0:                                                   # check current point along beam again map
                 break
             else:
                 pass
@@ -200,12 +200,12 @@ class Car():
             sensory -= 5*np.cos(self.theta*(2*np.pi)/360 + sensor_angle)
 
         ### Return Sensor Readings (relative to car) ###
-        sensor_read = math.sqrt((centre_x - sensorx)**2 + (centre_y - sensory)**2)                      # distance formula in x
+        sensor_read = math.sqrt((centre_x - sensorx)**2 + (centre_y - sensory)**2)                     # distance formula in x
         
         ### Visualisation ###
-        # beam_length_x = centre_x - sensor_read*np.sin(self.theta*(2*np.pi)/360 + sensor_angle)         # length of beam in x
-        # beam_length_y = centre_y - sensor_read*np.cos(self.theta*(2*np.pi)/360 + sensor_angle)         # length of beam in y
-        # pg.draw.line(win, BLUE, (centre_x, centre_y), (beam_length_x, beam_length_y))                  # draw beam
+        # beam_length_x = centre_x - sensor_read*np.sin(self.theta*(2*np.pi)/360 + sensor_angle)       # length of beam in x
+        # beam_length_y = centre_y - sensor_read*np.cos(self.theta*(2*np.pi)/360 + sensor_angle)       # length of beam in y
+        # pg.draw.line(win, BLUE, (centre_x, centre_y), (beam_length_x, beam_length_y))                # draw beam
         
         return round(sensor_read)
 
@@ -271,22 +271,21 @@ class Game():
     # being called in step method
     def controls(self, action):
 
-        # potential to add reward for different types of actions
         # right hand coord-sys: -theta==clockwise, +theta==anti-clockwise
 
-        if action == 0:                               # forward + left
+        if action == 0:                                         # forward + left
             self.car.vel += vel_inc
             self.car.vel = self.car.drag(self.car.vel)   
             self.car.theta += theta_inc
-        elif action == 1:                             # forward + right
+        elif action == 1:                                       # forward + right
             self.car.vel += vel_inc
             self.car.vel = self.car.drag(self.car.vel)   
             self.car.theta -= theta_inc
-        elif action == 2:                             # left
+        elif action == 2:                                       # left
             self.car.theta += theta_inc
-        elif action == 3:                             # right
+        elif action == 3:                                       # right
             self.car.theta -= theta_inc
-        elif action == 4:                             # forward
+        elif action == 4:                                       # forward
             self.car.vel += vel_inc
             self.car.vel = self.car.drag(self.car.vel)   
 
@@ -322,15 +321,15 @@ class Game():
     # being called in step method
     def run_frame(self):
 
-        for event in pg.event.get():                                                    # if exit button is pressed loop breaks
+        for event in pg.event.get():                                      # if exit button is pressed loop breaks
             if event.type == pg.QUIT:
                self.done = True
-               self.quit = True                   # quit all episodes
+               self.quit = True                                           # quit all episodes
                return self.done, self.quit
 
         self.redrawGameWindow()
-        self.done = self.car.checkLegalMove(self.car.vel, self.car.theta)               # checks whether car is on road or not
-        self.reward += np.power(self.car.vel,3)*0.0001         # velocity reward                               # add to reward for time step, reward for vel
+        self.done = self.car.checkLegalMove(self.car.vel, self.car.theta) # checks whether car is on road or not
+        self.reward += np.power(self.car.vel,3)*0.0001                    # reward for vel
         self.clock.tick(30)
 
 
@@ -342,9 +341,9 @@ if __name__ == "__main__":
     env = Game()
     total_reward = 0
     while env.done == False:
-        reward, state, done = env.step(random.randint(0,4))    # each time step returns rewards, states, done
+        reward, state, done = env.step(random.randint(0,4))               # each time step returns rewards, states, done
         total_reward += reward
         print(f"Step Reward: {reward}")
         print(f"State: {state}")
         print(f"Done: {done}")
-    print(f"CUMULATIVE REWARD: {total_reward}")    # total reward of episode
+    print(f"CUMULATIVE REWARD: {total_reward}")                           # total reward of episode
