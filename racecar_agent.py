@@ -12,7 +12,7 @@ env = Game()    # initialising environment
 
 ### NOTE ###
 '''
-Genetic Algorithm (general procedure):
+Genetic Algorithm (general method):
 
     Makes first generation of NNs, using the same architecure but different weights
 
@@ -25,6 +25,14 @@ Genetic Algorithm (general procedure):
     percentage of weights by sampling from a normal distribution
 
     This next then is then tested and performance is measured
+
+
+Next Steps:
+
+    Add a cross population method
+
+    Keep best 20% of models and sample other 80%
+
 
 
 ACTIONS:
@@ -46,6 +54,7 @@ class AI():
         self.action_space = action_space
         self.state_space = state_space
         self.std_deviation = 0.1
+        self.mutation_probability = 0.3
 
         self.model = self.build_model()                               # creating model
 
@@ -64,7 +73,7 @@ class AI():
 
 
     def get_cumulative_probs(self, generation_loss):
-        reward = np.array(generation_loss)
+        reward = np.array(generation_loss)**2  # better values are favoured
         total = sum(reward)
         reward = reward/total
 
@@ -89,7 +98,6 @@ class AI():
 
     def perform_mutation(self, model):
 
-        mutate_probability = 0.5
         child_model = self.build_model()     # new model to save new weights to
 
         for l in range(len(model.layers)):
@@ -99,7 +107,7 @@ class AI():
 
             for i in range(len(weights[0])):
                 for j in range(len(weights[0][0])):
-                    if np.random.rand() < mutate_probability:
+                    if np.random.rand() < self.mutation_probability:
                         child_weights[0][i][j] = np.random.normal(weights[0][i][j], self.std_deviation, 1)   # writing new weights for child
 
             child_model.layers[l].set_weights(child_weights)
