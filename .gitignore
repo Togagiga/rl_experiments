@@ -8,3 +8,4 @@ test_env/*.png
 /__pycache__
 *h5
 *.ipynb_checkpoints
+/performance

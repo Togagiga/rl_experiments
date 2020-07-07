@@ -14,16 +14,17 @@ env = Game()    # initialising environment
 '''
 Genetic Algorithm (general procedure):
 
-    Makes first generation of NN, using the same architecure but different weights
+    Makes first generation of NNs, using the same architecure but different weights
 
-    Performance measure find the best NN after env.done == True
+    Performance measure used to find the best NN after env.done == True
 
-    Best NN is used to create the next generation    (May be necessary to use the best 3...)
+    Next gen is probabilistically sampled from previous generation, with better performing models
+    given higher probability of being picked
 
-    Weights of next generation are found by using the weights as the mean of a normal
-    distribution and sampling from it
+    Next generation is then mutated using perform_mutation which probabilistically changes a certain
+    percentage of weights by sampling from a normal distribution
 
-    Next generation is evaluated, best if chosen
+    This next then is then tested and performance is measured
 
 
 ACTIONS:
@@ -62,33 +63,52 @@ class AI():
         return np.argmax(prediction_values[0])
 
 
-    def get_cumulative_probs(gen_loss):
-        reward = np.array(gen_loss)
+    def get_cumulative_probs(self, generation_loss):
+        reward = np.array(generation_loss)
         total = sum(reward)
         reward = reward/total
 
+        cum_probs = [reward[0]]
+        for i in range(1, len(reward)):
+            cum_probs.append(cum_probs[i-1] + reward[i])
+        return cum_probs
 
 
+    def get_next_gen(self, generation_loss, generation_size):
+        cumulative_probabilities = self.get_cumulative_probs(generation_loss)
+        next_gen = []
+        for i in range(generation_size):
+            sample = np.random.rand()
+            # print(sample)
+            for j in range(len(cumulative_probabilities)):
+                if sample <= cumulative_probabilities[j]:
+                    next_gen.append(j)
+                    break
+        return next_gen
 
-    def get_child(self, best_model):
 
-        mutate_probability = 0.7
+    def perform_mutation(self, model):
+
+        mutate_probability = 0.5
         child_model = self.build_model()     # new model to save new weights to
 
-        for l in range(len(best_model.layers)):
+        for l in range(len(model.layers)):
 
-            weights = np.array(best_model.layers[l].get_weights())
+            weights = np.array(model.layers[l].get_weights())
             child_weights = weights
 
             for i in range(len(weights[0])):
                 for j in range(len(weights[0][0])):
-                    if np.random.rand() > mutate_probability:
+                    if np.random.rand() < mutate_probability:
                         child_weights[0][i][j] = np.random.normal(weights[0][i][j], self.std_deviation, 1)   # writing new weights for child
 
             child_model.layers[l].set_weights(child_weights)
 
         return child_model
 
+    def mate_generation():
+        # still needs to be implemented
+        pass
 
 
 
@@ -96,37 +116,33 @@ def train_AI(generations, generation_size = 10, time_steps = 300):
 
     loss = []
     agent = AI()
-    best_model = agent.model                                 # creating initial model
+    current_gen = []
+
+    # need to create initial generation
+    for model in range(generation_size):
+        current_gen.append(agent.build_model())
+
 
     for generation in range(generations):
 
         generation_loss = []
-        models = []
-
-        for model in range(generation_size):                 # create offspring from best_model
-            models.append(agent.get_child(best_model))
-
 
         for model in range(generation_size):
 
             state = env.reset(generation+1, model+1)
             state = np.reshape(state, (1,6))                 # initial state (reshape needed for NN)
             score = 0                                        # cumulative reward for episode
-            agent.model = models[model]
+            agent.model = current_gen[model]
+            agent.model = agent.perform_mutation(agent.model)# need to create mutation
             max_steps = time_steps
 
             for i in range(max_steps):
 
                 action = agent.get_action(state)             # action from agent
-                # print(f"Action Generated: {action}")
-                reward, next_state, done = env.step(action)
-                next_state = np.reshape(next_state, (1,6))
+                reward, next_state, done = env.step(action)  # one frame
+                next_state = np.reshape(next_state, (1,6))   # reshape for NN
                 score += reward
                 state = next_state
-                
-                # print(f"Step Reward: {reward}")
-                # print(f"State: {state}")
-                # print(f"Done: {done}\n")
 
                 if done:
                     print("--> generation: {}, model: {}/{}, score: {}".format(generation+1, model+1, generation_size, round(score, 3)))
@@ -134,25 +150,15 @@ def train_AI(generations, generation_size = 10, time_steps = 300):
 
             generation_loss.append(score)
 
+        # reassign current_gen using probabilistic method rather than deterministic
+        next_gen = agent.get_next_gen(generation_loss, generation_size)
+        next_gen_temp = []
+        for i in next_gen:
+            next_gen_temp.append(current_gen[i])
+        current_gen = next_gen_temp
+        print()
 
-        max_gen_loss = np.argmax(generation_loss)
-
-        if generation == 0:                               # for first gen only
-            best_model = models[max_gen_loss]             # reassigns best model        
-
-        elif generation_loss[max_gen_loss] > loss[np.argmax(loss)]:    # check whether new gen is better than best_model
-            best_model = models[max_gen_loss]             # reassigning best_model based on highest loss
-            # if agent.std_deviation > 0.1:
-            #     agent.std_deviation -= 0.1
-
-        else:
-            # generation_loss[max_gen_loss] = loss[-1]      # if not add previous best loss to loss
-            # if agent.std_deviation < 0.3:
-            #     agent.std_deviation += 0.1
-            pass
-
-
-        loss.append(generation_loss[max_gen_loss])
+        loss.append(generation_loss[np.argmax(generation_loss)])
 
 
         if env.quit == True:
@@ -162,11 +168,10 @@ def train_AI(generations, generation_size = 10, time_steps = 300):
 
 
 
-
 if __name__ == "__main__":
 
-    generations = 5
-    generation_size = 3
+    generations = 10
+    generation_size = 10
     loss = train_AI(generations, generation_size)
     print(f"Generation Loss: {loss}")
 
