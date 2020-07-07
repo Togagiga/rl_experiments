@@ -62,6 +62,14 @@ class AI():
         return np.argmax(prediction_values[0])
 
 
+    def get_cumulative_probs(gen_loss):
+        reward = np.array(gen_loss)
+        total = sum(reward)
+        reward = reward/total
+
+
+
+
     def get_child(self, best_model):
 
         mutate_probability = 0.7
@@ -74,7 +82,7 @@ class AI():
 
             for i in range(len(weights[0])):
                 for j in range(len(weights[0][0])):
-                    if np.random.random() > mutate_probability:
+                    if np.random.rand() > mutate_probability:
                         child_weights[0][i][j] = np.random.normal(weights[0][i][j], self.std_deviation, 1)   # writing new weights for child
 
             child_model.layers[l].set_weights(child_weights)
