@@ -11,8 +11,9 @@ win = pg.display.set_mode(size)
 pg.display.set_caption('Car Race')
 start_pos_x, start_pos_y = 1000, 1000
 
+
 road_width = 20
-car_img = pg.image.load('assets/car-top-view.png').convert_alpha()   # loading car image
+car_img = pg.image.load('/home/jonas/Documents/GitHub/rl_experiments/assets/car-top-view.png').convert_alpha()   # loading car image
 car_width, car_height = 25, 50                                      # specificing scaling size
 car_img = pg.transform.scale(car_img, (car_width,car_height))        # scaling car image
 
@@ -112,7 +113,7 @@ class Car():
         self.update_pos(self.vel, self.theta)                  # updating x y coords          
         img = rot_center(car_img, self.theta)                  # calls function to rotate image around centre point
         # drawing retangle representing actual car width and height #
-        pg.draw.rect(win, RED, (self.x - (img.get_rect().width - car_width)/2, self.y - (img.get_rect().height - car_height)/2, img.get_rect().width, img.get_rect().height))
+        pg.draw.rect(win, GREY, (self.x - (img.get_rect().width - car_width)/2, self.y - (img.get_rect().height - car_height)/2, img.get_rect().width, img.get_rect().height))
         win.blit(img, (self.x - (img.get_rect().width - car_width)/2, self.y - (img.get_rect().height - car_height)/2)) #subtracting from x and y to ensure smooth rotation
 
 
@@ -160,9 +161,20 @@ def home_screen(self, start, jump, score, highscore):
         
     return jump, start, score
 
+def score():
+    generation = 1
+    model = 1
+    font = pg.font.SysFont(None, 25)
+    text_gen = font.render("Generation: "+str(generation), True, (0, 0, 0))
+    text_model = font.render("Model: "+str(model), True, (0, 0, 0))
+    win.blit(text_gen, (10, 10))
+    win.blit(text_model, (10, 30))
+
+
 def redrawGameWindow():
     race_map.draw()
     car.draw()
+    score()
 
     pg.display.update()
 

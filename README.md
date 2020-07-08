@@ -1,8 +1,10 @@
 [![license](https://img.shields.io/github/license/Togagiga/rl_experiments.svg)](https://opensource.org/licenses/MIT)
 
-# RL EXPERIMENTS
+<p align="center">
+	<img src="assets/banner2.png" />
+</p>
 
-An attempt at utilising reinforcement learning (RL) for a simple 2D game.
+An attempt at utilising genetic algorithms and reinforcement learning (RL) for a simple 2D game.
 
 ## test_env and test_agent
 
