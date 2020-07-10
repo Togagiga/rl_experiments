@@ -36,10 +36,9 @@ class Map():
         self.map = np.zeros((int(width/self.tilesize), int(height/self.tilesize)), dtype = int)
         
 
-
         ### Making Ghetto Map ###
 
-        self.map[10:120, 90:110] = 1
+        self.map[10:110, 90:110] = 1
         self.map[10:30, 10:110] = 1
         self.map[10:60, 10:30] = 1
         self.map[40:60, 30:80] = 1
@@ -65,6 +64,23 @@ class Map():
         self.map[90:110, 40:41] = 2
         self.map[90:110, 20:21] = 2
 
+        ### Drawing finish lines ###
+
+        self.map[90:110, 0:5] = 3
+
+
+    def read_map(self, filename):
+        
+        self.map = []
+        with open(filename, "r") as file:
+            for line in file:
+                result = line.rstrip().split()
+                result = [int(i) for i in result]
+                self.map.append(result)
+
+        self.map = np.array(self.map).reshape(len(self.map), len(self.map[0]))
+
+        return self.map
         
         
     def draw(self):
@@ -77,6 +93,8 @@ class Map():
                     pg.draw.rect(self.game.win, GREY, (j, i, self.tilesize, self.tilesize))
                 elif self.map[int(i/self.tilesize),int(j/self.tilesize)] == 2:
                     pg.draw.rect(self.game.win, GREY, (j, i, self.tilesize, self.tilesize))
+                elif self.map[int(i/self.tilesize),int(j/self.tilesize)] == 3:
+                    pg.draw.rect(self.game.win, RED, (j, i, self.tilesize, self.tilesize))
 
 
 
@@ -85,7 +103,7 @@ class Car():
     def __init__(self, game, map_class, x=1000, y=1000, vel = 0, theta = 0, on_red = 0):
         self.game = game                                       # instance of Game class
         self.map = map_class                                   # named map_class to avoid clash with map keyword
-        self.tilesize = map_class.tilesize
+        self.tilesize = self.map.tilesize
         self.x = int(x)
         self.y = int(y)
         self.theta = theta
@@ -135,7 +153,9 @@ class Car():
         check_score = np.argwhere(self.map.map[map_y:map_y + car_h_tiles, map_x:map_x + car_w_tiles] == 2)
         
         if len(check) != 0:
-            return True
+            return True      # sets self.done
+
+        ### need to catch when in finish and stop GA
             
         else:
             if len(check_score) != 0:
@@ -258,6 +278,8 @@ class Game():
                 self.car.sensor("RIGHT"),
                 self.car.vel]
 
+        state = np.array(state)/max(state)
+
         return state
 
 
@@ -314,6 +336,8 @@ class Game():
                 self.car.sensor("F_RIGHT"),
                 self.car.sensor("RIGHT"),
                 self.car.vel]
+
+        state = np.array(state)/max(state)
 
         return self.reward, state, self.done
 

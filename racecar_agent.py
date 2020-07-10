@@ -178,8 +178,8 @@ def train_AI(generations, generation_size = 10, time_steps = 300):
 
 if __name__ == "__main__":
 
-    generations = 10
-    generation_size = 10
+    generations = 3
+    generation_size = 3
     loss = train_AI(generations, generation_size)
     print(f"Generation Loss: {loss}")
 

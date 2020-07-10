@@ -4,7 +4,7 @@
 	<img src="assets/banner2.png" />
 </p>
 
-An attempt at utilising genetic algorithms and reinforcement learning (RL) for a simple 2D game.
+An attempt at utilising genetic algorithms and reinforcement learning (RL) for solving a custom environment.
 
 ## test_env and test_agent
 
@@ -14,7 +14,7 @@ An attempt at utilising genetic algorithms and reinforcement learning (RL) for a
 ## racecar_env and racecar_agent
 
 - [x] Make the basic racecar environment
-- [ ] Make simple agent: Current plan is to use a genetic algorithm
+- [x] Make simple agent: Current plan is to use a genetic algorithm
 
 #### Genectic Algorithm Basic Flowchart
 
