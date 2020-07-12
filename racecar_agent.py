@@ -27,11 +27,14 @@ Genetic Algorithm (general method):
     This next then is then tested and performance is measured
 
 
-Next Steps:
+Next Improvements:
 
-    Add a cross population method
+    Add a cross population method (write mate_generation function)
 
-    Keep best 20% of models and sample other 80%
+    Keep best 20% of models and sample other 80% (done, though they are still mutated...) -> reinforces issues
+    such as model driving straight into first wall
+
+    adjust std_deviation if generations do not progress/stagnant
 
 
 
@@ -41,6 +44,7 @@ ACTIONS:
     2 == left
     3 == right
     4 == forward
+    5 == cruise
 
 STATE:
     [L_sensor, FL_sensor, F_sensor, FR_sensor, R_sensor, car.vel]
@@ -50,7 +54,7 @@ STATE:
 
 
 class AI():
-    def __init__(self, action_space = 5, state_space = 6):
+    def __init__(self, action_space = 6, state_space = 6):
         self.action_space = action_space
         self.state_space = state_space
         self.std_deviation = 0.1
@@ -83,16 +87,23 @@ class AI():
         return cum_probs
 
 
+    # returns indices of models for next gen not the models themselves
     def get_next_gen(self, generation_loss, generation_size):
+
         cumulative_probabilities = self.get_cumulative_probs(generation_loss)
         next_gen = []
-        for i in range(generation_size):
+        num_add = round(generation_size*0.2)           # 20% of generation_size
+
+        for i in range(generation_size - num_add):     # samples 80% of next gen
             sample = np.random.rand()
             # print(sample)
             for j in range(len(cumulative_probabilities)):
                 if sample <= cumulative_probabilities[j]:
                     next_gen.append(j)
                     break
+        for _ in range(num_add):
+            next_gen.append(np.argmax(generation_loss))   # adding 20% of next_gen as best model
+
         return next_gen
 
 
@@ -164,13 +175,14 @@ def train_AI(generations, generation_size = 10, time_steps = 300):
         for i in next_gen:
             next_gen_temp.append(current_gen[i])
         current_gen = next_gen_temp
-        print()
+        print("")  # separating generation output in terminal
 
-        loss.append(generation_loss[np.argmax(generation_loss)])
+        loss.append(generation_loss[np.argmax(generation_loss)])   # append to overall loss
 
 
         if env.quit == True:
             print("----------User Quit Training---------")
+            break
     return loss
 
 
@@ -178,14 +190,15 @@ def train_AI(generations, generation_size = 10, time_steps = 300):
 
 if __name__ == "__main__":
 
-    generations = 3
-    generation_size = 3
+    generations = 15
+    generation_size = 15
     loss = train_AI(generations, generation_size)
     print(f"Generation Loss: {loss}")
 
     # plotting
-    plt.plot(range(1, generations+1), loss)
-    plt.title("Learning of AI in racecar_env")
-    plt.xlabel("generation")
-    plt.ylabel("loss")
-    plt.show()
+    if env.quit == False:
+        plt.plot(range(1, generations+1), loss)
+        plt.title("Learning of AI in racecar_env")
+        plt.xlabel("generation")
+        plt.ylabel("loss")
+        plt.show()

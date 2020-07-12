@@ -127,7 +127,7 @@ class Car():
     ### function to produce drag effect ###
     def drag(self, vel):
         if vel >= 0: 
-            vel -= drag_const*np.square(vel)  
+            vel -= drag_const*np.square(vel)
         else:
             vel += drag_const*np.square(vel)
             
@@ -250,7 +250,7 @@ class Game():
         self.model = 1
 
 
-    def reset(self, generation, model):
+    def reset(self, generation = 0, model = 0):
 
         self.generation = generation
         self.model = model
@@ -298,11 +298,9 @@ class Game():
 
         if action == 0:                                         # forward + left
             self.car.vel += vel_inc
-            self.car.vel = self.car.drag(self.car.vel)   
             self.car.theta += theta_inc
         elif action == 1:                                       # forward + right
             self.car.vel += vel_inc
-            self.car.vel = self.car.drag(self.car.vel)   
             self.car.theta -= theta_inc
         elif action == 2:                                       # left
             self.car.theta += theta_inc
@@ -310,8 +308,9 @@ class Game():
             self.car.theta -= theta_inc
         elif action == 4:                                       # forward
             self.car.vel += vel_inc
-            self.car.vel = self.car.drag(self.car.vel)   
-
+        elif action == 5:                                       # cruise
+            pass
+   
 
 
     # being called in run_frame method
@@ -354,20 +353,42 @@ class Game():
         self.redrawGameWindow()
         self.done = self.car.checkLegalMove(self.car.vel, self.car.theta) # checks whether car is on road or not
         self.reward += np.power(self.car.vel,3)*0.0001                    # reward for vel
+        self.car.vel = self.car.drag(self.car.vel)                        # add drag after each step
         self.clock.tick(30)
 
 
+
+##### FOR KEY INPUT ONLY #####
+
+def get_user_input():
+
+    keys = pg.key.get_pressed()
+
+    if keys[pg.K_UP] and keys[pg.K_LEFT]:
+        return 0
+    elif keys[pg.K_UP] and keys[pg.K_RIGHT]:
+        return 1
+    elif keys[pg.K_LEFT]:
+        return 2
+    elif keys[pg.K_RIGHT]:
+        return 3
+    elif keys[pg.K_UP]:
+        return 4
+
+##############################
 
 
 
 if __name__ == "__main__":
 
     env = Game()
+    # env.reset()
     total_reward = 0
     while env.done == False:
-        reward, state, done = env.step(random.randint(0,4))               # each time step returns rewards, states, done
+        action = get_user_input()
+        reward, state, done = env.step(action)                            # each time step returns rewards, states, done
         total_reward += reward
-        print(f"Step Reward: {reward}")
-        print(f"State: {state}")
-        print(f"Done: {done}")
+        # print(f"Step Reward: {reward}")
+        # print(f"State: {state}")
+        # print(f"Done: {done}")
     print(f"CUMULATIVE REWARD: {total_reward}")                           # total reward of episode
