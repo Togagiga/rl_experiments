@@ -10,3 +10,4 @@ test_env/*.png
 *.ipynb_checkpoints
 /performance
 /test_env
+/deprecated
