@@ -7,7 +7,7 @@ from tensorflow.keras.layers import Dense
 from tensorflow.keras.optimizers import Adam
 import matplotlib.pyplot as plt
 
-env = Game()    # initialising environment
+env = Game()    # instantiating environment
 
 
 ### NOTE ###
@@ -34,7 +34,7 @@ Next Improvements:
     Keep best 20% of models and sample other 80% (done, though they are still mutated...) -> reinforces issues
     such as model driving straight into first wall
 
-    adjust std_deviation if generations do not progress/stagnant
+    adjustable std_deviation for when generations do not progress/stagnant
 
 
 

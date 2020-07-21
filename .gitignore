@@ -9,3 +9,4 @@ test_env/*.png
 *h5
 *.ipynb_checkpoints
 /performance
+/test_env
