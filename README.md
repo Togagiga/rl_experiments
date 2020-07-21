@@ -42,3 +42,5 @@ An initial generation is initialised randomly. This generation's fitness is calc
 - [ ] Try more standard Rl approaches for agent
 - [ ] Try some hybrid of GA and Q-Learning/Policy Learning
 - [ ] Compare agents
+
+Date: 21/07/2020
