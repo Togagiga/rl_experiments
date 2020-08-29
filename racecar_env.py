@@ -15,7 +15,7 @@ import math
 import time
 import random
 
-size = width, height = 1200, 1200                              # size of window
+size = width, height = 1000, 1000                              # size of window
 car_width, car_height = 25, 50                                 # size of car
 
 vel_inc = 0.4
@@ -30,43 +30,41 @@ BLUE = (0, 188, 255)
 
 class Map():
 
-    def __init__(self, game):
-        self.game = game
+    def __init__(self, Game):
+        self.Game = Game
         self.tilesize = 10
         self.map = np.zeros((int(width/self.tilesize), int(height/self.tilesize)), dtype = int)
         
 
         ### Making Ghetto Map ###
 
-        self.map[10:110, 90:110] = 1
-        self.map[10:30, 10:110] = 1
+        self.map[10:90, 70:90] = 1
+        self.map[10:30, 10:90] = 1
         self.map[10:60, 10:30] = 1
-        self.map[40:60, 30:80] = 1
-        self.map[60:110, 60:80] = 1
-        self.map[90:110, 0:80] = 1
+        self.map[40:60, 30:60] = 1
+        self.map[60:90, 40:60] = 1
+        self.map[70:90, 0:60] = 1
         
         ### Drawing reward lines ###
         
-        self.map[90:91, 90:110] = 2
-        self.map[70:71, 90:110] = 2
-        self.map[50:51, 90:110] = 2
-        self.map[30:31, 90:110] = 2        
-        self.map[10:30, 89:90] = 2
-        self.map[10:30, 70:71] = 2
+        self.map[70:71, 70:90] = 2
+        self.map[50:51, 70:90] = 2
+        self.map[30:31, 70:90] = 2
+        self.map[10:30, 69:70] = 2
         self.map[10:30, 50:51] = 2
-        self.map[10:30, 30:31] = 2        
-        self.map[35:36, 10:30] = 2        
+        self.map[10:30, 30:31] = 2
+        self.map[30:31, 10:30] = 2
+        self.map[39:40, 10:30] = 2
         self.map[40:60, 30:31] = 2
-        self.map[40:60, 50:51] = 2        
-        self.map[60:61, 60:80] = 2
-        self.map[80:81, 60:80] = 2        
-        self.map[90:110, 59:60] = 2
-        self.map[90:110, 40:41] = 2
-        self.map[90:110, 20:21] = 2
+        self.map[40:60, 39:40] = 2
+        self.map[60:61, 40:60] = 2
+        self.map[69:70, 40:60] = 2
+        self.map[70:90, 39:40] = 2
+        self.map[70:90, 20:21] = 2
 
         ### Drawing finish lines ###
 
-        self.map[90:110, 0:5] = 3
+        self.map[70:90, 0:5] = 3
 
 
     def read_map(self, filename):
@@ -88,27 +86,27 @@ class Map():
         for i in range(0, width, self.tilesize):
             for j in range(0, height, self.tilesize):
                 if self.map[int(i/self.tilesize),int(j/self.tilesize)] == 0:
-                    pg.draw.rect(self.game.win, GREEN, (j, i, self.tilesize, self.tilesize))
+                    pg.draw.rect(self.Game.win, GREEN, (j, i, self.tilesize, self.tilesize))
                 elif self.map[int(i/self.tilesize),int(j/self.tilesize)] == 1:
-                    pg.draw.rect(self.game.win, GREY, (j, i, self.tilesize, self.tilesize))
+                    pg.draw.rect(self.Game.win, GREY, (j, i, self.tilesize, self.tilesize))
                 elif self.map[int(i/self.tilesize),int(j/self.tilesize)] == 2:
-                    pg.draw.rect(self.game.win, GREY, (j, i, self.tilesize, self.tilesize))
+                    pg.draw.rect(self.Game.win, GREY, (j, i, self.tilesize, self.tilesize))
                 elif self.map[int(i/self.tilesize),int(j/self.tilesize)] == 3:
-                    pg.draw.rect(self.game.win, RED, (j, i, self.tilesize, self.tilesize))
+                    pg.draw.rect(self.Game.win, RED, (j, i, self.tilesize, self.tilesize))
 
 
 
 class Car():
 
-    def __init__(self, game, map_class, x=1000, y=1000, vel = 0, theta = 0, on_red = 0):
-        self.game = game                                       # instance of Game class
-        self.map = map_class                                   # named map_class to avoid clash with map keyword
-        self.tilesize = self.map.tilesize
+    def __init__(self, Game, Map, x=800, y=800, vel = 0, theta = 0):
+        self.Game = Game                                       # instance of Game class
+        self.Map = Map                                         # instance of Map class
+        self.tilesize = self.Map.tilesize
         self.x = int(x)
         self.y = int(y)
         self.theta = theta
         self.vel = vel                                         # how far car moves (in pixels) with each press of a button
-        self.on_red = on_red
+        self.on_red = 0
 
         self.car_img = pg.image.load('assets/car-top-view.png').convert_alpha()   # loading car image
         self.car_img = pg.transform.scale(self.car_img, (car_width,car_height))   # scaling car image
@@ -149,11 +147,15 @@ class Car():
         car_h_tiles = math.ceil(car_h/self.tilesize)           # getting car size in tiles
         car_w_tiles = math.ceil(car_w/self.tilesize)
 
-        check =  np.argwhere(self.map.map[map_y:map_y + car_h_tiles, map_x:map_x + car_w_tiles] == 0)  # if car is on zeros on map
-        check_score = np.argwhere(self.map.map[map_y:map_y + car_h_tiles, map_x:map_x + car_w_tiles] == 2)
+        check =  np.argwhere(self.Map.map[map_y:map_y + car_h_tiles, map_x:map_x + car_w_tiles] == 0)  # if car is on zeros on map
+        check_score = np.argwhere(self.Map.map[map_y:map_y + car_h_tiles, map_x:map_x + car_w_tiles] == 2)
+        check_finish = check_score = np.argwhere(self.Map.map[map_y:map_y + car_h_tiles, map_x:map_x + car_w_tiles] == 3)
         
         if len(check) != 0:
-            return True      # sets self.done
+            return True      # sets self.done == True
+        elif len(check_finish) != 0:
+            self.Game.reward += 500
+            return True
 
         ### need to catch when in finish and stop GA
             
@@ -163,7 +165,7 @@ class Car():
             
             else:
                 if self.on_red == 1:
-                    self.game.reward += 5
+                    self.Game.reward += 5
                 self.on_red = 0
             return False
             
@@ -173,15 +175,15 @@ class Car():
         # rotating car image
         img = self.rot_center(self.car_img, self.theta)
         # blitting over car in previous time step
-        pg.draw.rect(self.game.win, GREY, (self.x - (img.get_rect().width - car_width)/2 - 1, self.y - (img.get_rect().height - car_height)/2 - 1, img.get_rect().width + 2, img.get_rect().height + 2))
+        pg.draw.rect(self.Game.win, GREY, (self.x - (img.get_rect().width - car_width)/2 - 1, self.y - (img.get_rect().height - car_height)/2 - 1, img.get_rect().width + 2, img.get_rect().height + 2))
         # updating the positon of car for time step
         self.update_pos(self.vel, self.theta)
         # rotating car image
         img = self.rot_center(self.car_img, self.theta)
         # drawing retangle representing actual car width and height
-        pg.draw.rect(self.game.win, GREY, (self.x - (img.get_rect().width - car_width)/2, self.y - (img.get_rect().height - car_height)/2, img.get_rect().width, img.get_rect().height))
+        pg.draw.rect(self.Game.win, GREY, (self.x - (img.get_rect().width - car_width)/2, self.y - (img.get_rect().height - car_height)/2, img.get_rect().width, img.get_rect().height))
         # blitting car of current time step to game window
-        self.game.win.blit(img, (self.x - (img.get_rect().width - car_width)/2, self.y - (img.get_rect().height - car_height)/2)) #subtracting from x and y to ensure smooth rotation
+        self.Game.win.blit(img, (self.x - (img.get_rect().width - car_width)/2, self.y - (img.get_rect().height - car_height)/2)) #subtracting from x and y to ensure smooth rotation
 
 
 
@@ -209,9 +211,7 @@ class Car():
                 sensor_read = sensor_range
                 break
             
-            # self.map.map is because of terrible naming of the map instance being passed 
-            # into car class in __init__ BUT cannot be arsed changing it...sorry
-            if self.map.map[point[1],point[0]] == 0:                                                   # check current point along beam again map
+            if self.Map.map[point[1],point[0]] == 0:                                                   # check current point along beam again map
                 break
             else:
                 pass
@@ -239,9 +239,9 @@ class Game():
         self.win = pg.display.set_mode(size)
         self.clock = pg.time.Clock()
         pg.display.set_caption('Car Race')
-        self.map = Map(self)
-        self.car = Car(self, self.map)      # passing in self as the game class instance
-        self.map.draw()
+        self.Map = Map(self)
+        self.Car = Car(self, self.Map)      # passing in self as the game class instance
+        self.Map.draw()
         self.reward = 0
         self.done = False
         self.quit = False
@@ -262,21 +262,21 @@ class Game():
             return
 
         self.done = False
-        self.car.x = 1000
-        self.car.y = 1000
-        self.car.vel = 0
-        self.car.theta = 0
-        self.car.on_red = 0
+        self.Car.x = 800
+        self.Car.y = 800
+        self.Car.vel = 0
+        self.Car.theta = 0
+        self.Car.on_red = 0
         self.reward = 0
-        self.map.draw()
+        self.Map.draw()
         self.score()
 
-        state = [self.car.sensor("LEFT"),
-                self.car.sensor("F_LEFT"),
-                self.car.sensor("FRONT"),
-                self.car.sensor("F_RIGHT"),
-                self.car.sensor("RIGHT"),
-                self.car.vel]
+        state = [self.Car.sensor("LEFT"),
+                self.Car.sensor("F_LEFT"),
+                self.Car.sensor("FRONT"),
+                self.Car.sensor("F_RIGHT"),
+                self.Car.sensor("RIGHT"),
+                self.Car.vel]
 
         state = np.array(state)/max(state)
 
@@ -297,17 +297,17 @@ class Game():
         # right hand coord-sys: -theta==clockwise, +theta==anti-clockwise
 
         if action == 0:                                         # forward + left
-            self.car.vel += vel_inc
-            self.car.theta += theta_inc
+            self.Car.vel += vel_inc
+            self.Car.theta += theta_inc
         elif action == 1:                                       # forward + right
-            self.car.vel += vel_inc
-            self.car.theta -= theta_inc
+            self.Car.vel += vel_inc
+            self.Car.theta -= theta_inc
         elif action == 2:                                       # left
-            self.car.theta += theta_inc
+            self.Car.theta += theta_inc
         elif action == 3:                                       # right
-            self.car.theta -= theta_inc
+            self.Car.theta -= theta_inc
         elif action == 4:                                       # forward
-            self.car.vel += vel_inc
+            self.Car.vel += vel_inc
         elif action == 5:                                       # cruise
             pass
    
@@ -317,7 +317,7 @@ class Game():
     def redrawGameWindow(self):
 
         self.done = False
-        self.car.draw()
+        self.Car.draw()
         pg.display.update()
 
 
@@ -329,12 +329,12 @@ class Game():
 
         self.run_frame()
 
-        state = [self.car.sensor("LEFT"),
-                self.car.sensor("F_LEFT"),
-                self.car.sensor("FRONT"),
-                self.car.sensor("F_RIGHT"),
-                self.car.sensor("RIGHT"),
-                self.car.vel]
+        state = [self.Car.sensor("LEFT"),
+                self.Car.sensor("F_LEFT"),
+                self.Car.sensor("FRONT"),
+                self.Car.sensor("F_RIGHT"),
+                self.Car.sensor("RIGHT"),
+                self.Car.vel]
 
         state = np.array(state)/max(state)
 
@@ -351,9 +351,9 @@ class Game():
                return self.done, self.quit
 
         self.redrawGameWindow()
-        self.done = self.car.checkLegalMove(self.car.vel, self.car.theta) # checks whether car is on road or not
-        self.reward += np.power(self.car.vel,3)*0.0001                    # reward for vel
-        self.car.vel = self.car.drag(self.car.vel)                        # add drag after each step
+        self.done = self.Car.checkLegalMove(self.Car.vel, self.Car.theta) # checks whether car is on road or not
+        self.reward += np.power(self.Car.vel,3)*0.0001                    # reward for vel
+        self.Car.vel = self.Car.drag(self.Car.vel)                        # add drag after each step
         self.clock.tick(30)
 
 
