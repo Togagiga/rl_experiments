@@ -186,10 +186,7 @@ def train_AI(generations, generation_size = 10, time_steps = 300):
     return loss
 
 
-
-
-if __name__ == "__main__":
-
+def main():
     generations = 15
     generation_size = 15
     loss = train_AI(generations, generation_size)
@@ -202,3 +199,9 @@ if __name__ == "__main__":
         plt.xlabel("generation")
         plt.ylabel("loss")
         plt.show()
+
+
+
+if __name__ == "__main__":
+
+	main()
