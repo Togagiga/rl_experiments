@@ -6,6 +6,7 @@ from tensorflow.keras import Sequential
 from tensorflow.keras.layers import Dense
 from tensorflow.keras.optimizers import Adam
 import matplotlib.pyplot as plt
+import sys
 
 env = Game()    # instantiating environment
 
@@ -30,12 +31,6 @@ Genetic Algorithm (general method):
 Next Improvements:
 
     Add a cross population method (write mate_generation function)
-
-    Keep best 20% of models and sample other 80% (done, though they are still mutated...) -> reinforces issues
-    such as model driving straight into first wall
-
-    adjustable std_deviation for when generations do not progress/stagnant
-
 
 
 ACTIONS:
@@ -77,7 +72,7 @@ class AI():
 
 
     def get_cumulative_probs(self, generation_loss):
-        reward = np.array(generation_loss)**2  # better values are favoured
+        reward = np.array(generation_loss)**3  # better values are favoured
         total = sum(reward)
         reward = reward/total
 
@@ -133,6 +128,7 @@ class AI():
 
 def train_AI(generations, generation_size = 10, time_steps = 300):
 
+    print("\nRunning Training...")
     loss = []
     agent = AI()
     current_gen = []
@@ -155,7 +151,7 @@ def train_AI(generations, generation_size = 10, time_steps = 300):
             agent.model = agent.perform_mutation(agent.model)# need to create mutation
             max_steps = time_steps
 
-            for i in range(max_steps):
+            for i in range(max_steps):                       # iterating through time steps
 
                 action = agent.get_action(state)             # action from agent
                 reward, next_state, done = env.step(action)  # one frame
@@ -163,11 +159,20 @@ def train_AI(generations, generation_size = 10, time_steps = 300):
                 score += reward
                 state = next_state
 
+                # if done set to True
                 if done:
-                    print("--> generation: {}, model: {}/{}, score: {}".format(generation+1, model+1, generation_size, round(score, 3)))
+                    print("--> generation: {}/{}, model: {}/{}, score: {}".format(generation+1, generations, model+1, generation_size, round(score, 3)))
                     break
+                # if timed out
+                elif i == max_steps-1:
+                    print("--> generation: {}/{}, model: {}/{}, score: {}".format(generation+1, generations, model+1, generation_size, round(score, 3)))
+                # if simulation window is closed
+                if env.quit == True:
+                    print("----------User Quit Training---------")
+                    return loss
 
             generation_loss.append(score)
+
 
         # reassign current_gen using probabilistic method rather than deterministic
         next_gen = agent.get_next_gen(generation_loss, generation_size)
@@ -179,16 +184,18 @@ def train_AI(generations, generation_size = 10, time_steps = 300):
 
         loss.append(generation_loss[np.argmax(generation_loss)])   # append to overall loss
 
-
-        if env.quit == True:
-            print("----------User Quit Training---------")
-            break
     return loss
 
 
 def main():
-    generations = 15
-    generation_size = 15
+    try:
+        generations = int(sys.argv[1])
+        generation_size = int(sys.argv[2])
+    except:
+        print("No command line args specified. Using pre-defined parameters!")
+        generations = 15
+        generation_size = 15
+
     loss = train_AI(generations, generation_size)
     print(f"Generation Loss: {loss}")
 
@@ -204,4 +211,4 @@ def main():
 
 if __name__ == "__main__":
 
-	main()
+    main()

@@ -1,7 +1,7 @@
 ### NOTES ###
 
 '''
-important functions needed from environment to interface with agent (name for AI in RL):
+important functions needed from environment to interface with agent:
 
 (when env=Game(), as above)
 
@@ -31,7 +31,7 @@ BLUE = (0, 188, 255)
 class Map():
 
     def __init__(self, Game):
-        self.Game = Game
+        self.Game = Game        # instance of Game class
         self.tilesize = 10
         self.map = np.zeros((int(width/self.tilesize), int(height/self.tilesize)), dtype = int)
         
@@ -255,12 +255,6 @@ class Game():
         self.generation = generation
         self.model = model
 
-        if self.quit == True:              # allows to quit all episodes by quitting game window
-        # none of the values are reset, so once current episode finishes, all following episodes
-        # will be in grass and thus only perform one loop before also terminating
-        # Not the most elegent solution but it quits the training process a lot faster
-            return
-
         self.done = False
         self.Car.x = 800
         self.Car.y = 800
@@ -352,7 +346,7 @@ class Game():
 
         self.redrawGameWindow()
         self.done = self.Car.checkLegalMove(self.Car.vel, self.Car.theta) # checks whether car is on road or not
-        self.reward += np.power(self.Car.vel,3)*0.0001                    # reward for vel
+        self.reward += np.power(self.Car.vel,3)*0.0001                     # reward for vel
         self.Car.vel = self.Car.drag(self.Car.vel)                        # add drag after each step
         self.clock.tick(30)
 
