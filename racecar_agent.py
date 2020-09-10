@@ -53,7 +53,7 @@ class AI():
         self.action_space = action_space
         self.state_space = state_space
         self.std_deviation = 0.1
-        self.mutation_probability = 0.3
+        self.mutation_probability = 0.1
 
         self.model = self.build_model()                               # creating model
 

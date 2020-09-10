@@ -149,7 +149,7 @@ class Car():
 
         check =  np.argwhere(self.Map.map[map_y:map_y + car_h_tiles, map_x:map_x + car_w_tiles] == 0)  # if car is on zeros on map
         check_score = np.argwhere(self.Map.map[map_y:map_y + car_h_tiles, map_x:map_x + car_w_tiles] == 2)
-        check_finish = check_score = np.argwhere(self.Map.map[map_y:map_y + car_h_tiles, map_x:map_x + car_w_tiles] == 3)
+        check_finish = np.argwhere(self.Map.map[map_y:map_y + car_h_tiles, map_x:map_x + car_w_tiles] == 3)
         
         if len(check) != 0:
             return True      # sets self.done == True
@@ -346,7 +346,7 @@ class Game():
 
         self.redrawGameWindow()
         self.done = self.Car.checkLegalMove(self.Car.vel, self.Car.theta) # checks whether car is on road or not
-        self.reward += np.power(self.Car.vel,3)*0.0001                     # reward for vel
+        self.reward += np.power(self.Car.vel,2)*0.0001                     # reward for vel
         self.Car.vel = self.Car.drag(self.Car.vel)                        # add drag after each step
         self.clock.tick(30)
 
