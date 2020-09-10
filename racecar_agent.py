@@ -114,9 +114,18 @@ class AI():
             for i in range(len(weights[0])):
                 for j in range(len(weights[0][0])):
                     if np.random.rand() < self.mutation_probability:
-                        child_weights[0][i][j] = np.random.normal(weights[0][i][j], self.std_deviation, 1)   # writing new weights for child
+                        # ensuring weight are in [-1,1] and then writing to child_weights
+                        changed_weight = np.random.normal(weights[0][i][j], self.std_deviation, 1)
+                        if changed_weight > 1:
+                            child_weights[0][i][j] = 1.0
+                        elif changed_weight < -1:
+                            child_weights[0][i][j] = -1.0
+                        else:
+                            child_weights[0][i][j] = changed_weight
+                        # print(changed_weight)
 
             child_model.layers[l].set_weights(child_weights)
+
 
         return child_model
 
@@ -193,8 +202,8 @@ def main():
         generation_size = int(sys.argv[2])
     except:
         print("No command line args specified. Using pre-defined parameters!")
-        generations = 15
-        generation_size = 15
+        generations = 5
+        generation_size = 5
 
     loss = train_AI(generations, generation_size)
     print(f"Generation Loss: {loss}")
