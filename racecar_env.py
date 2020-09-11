@@ -13,12 +13,15 @@ import numpy as np
 import pygame as pg
 import math
 
+
 size = width, height = 1000, 1000                              # size of window
 car_width, car_height = 25, 50                                 # size of car
 
 vel_inc = 0.2
-theta_inc = 5
+theta_inc = 6
 drag_const = 0.001
+
+map_type = 1                                              # 0 is Ghetto (OG), 1 is more detailed
 
 GREEN = (0, 138, 55)                                           # RGB Colours
 GREY = (67, 67, 67)
@@ -33,36 +36,69 @@ class Map():
         self.tilesize = 10
         self.map = np.zeros((int(width/self.tilesize), int(height/self.tilesize)), dtype = int)
         
+        if map_type == 0:
+            ### Making Ghetto Map ###
 
-        ### Making Ghetto Map ###
-
-        self.map[10:90, 70:90] = 1
-        self.map[10:30, 10:90] = 1
-        self.map[10:60, 10:30] = 1
-        self.map[40:60, 30:60] = 1
-        self.map[60:90, 40:60] = 1
-        self.map[70:90, 0:60] = 1
-        
-        ### Drawing reward lines ###
-        
-        self.map[70:71, 70:90] = 2
-        self.map[50:51, 70:90] = 2
-        self.map[30:31, 70:90] = 2
-        self.map[10:30, 69:70] = 2
-        self.map[10:30, 50:51] = 2
-        self.map[10:30, 30:31] = 2
-        self.map[30:31, 10:30] = 2
-        self.map[39:40, 10:30] = 2
-        self.map[40:60, 30:31] = 2
-        self.map[40:60, 39:40] = 2
-        self.map[60:61, 40:60] = 2
-        self.map[69:70, 40:60] = 2
-        self.map[70:90, 39:40] = 2
-        self.map[70:90, 20:21] = 2
-
-        ### Drawing finish lines ###
-
-        self.map[70:90, 0:5] = 3
+            self.map[10:90, 70:90] = 1
+            self.map[10:30, 10:90] = 1
+            self.map[10:60, 10:30] = 1
+            self.map[40:60, 30:60] = 1
+            self.map[60:90, 40:60] = 1
+            self.map[70:90, 0:60] = 1
+            
+            ### Drawing reward lines ###
+            
+            self.map[70:71, 70:90] = 2
+            self.map[50:51, 70:90] = 2
+            self.map[30:31, 70:90] = 2
+            self.map[10:30, 69:70] = 2
+            self.map[10:30, 50:51] = 2
+            self.map[10:30, 30:31] = 2
+            self.map[30:31, 10:30] = 2
+            self.map[39:40, 10:30] = 2
+            self.map[40:60, 30:31] = 2
+            self.map[40:60, 39:40] = 2
+            self.map[60:61, 40:60] = 2
+            self.map[69:70, 40:60] = 2
+            self.map[70:90, 39:40] = 2
+            self.map[70:90, 20:21] = 2
+    
+            ### Drawing finish lines ###
+    
+            self.map[70:90, 0:5] = 3
+            
+            self.starting_pos = [800,800]
+            
+        else:
+            ### Drawing roads ###    
+            self.map[60:100, 80:95] = 1
+            self.map[60:75, 50:95] = 1
+            self.map[30:60, 50:65] = 1
+            self.map[30:45, 65:95] = 1
+            self.map[5:30, 80:95] = 1
+            self.map[5:20, 30:80] = 1
+            self.map[20:95, 30:45] = 1
+            self.map[80:95, 5:30] = 1
+            self.map[0:95, 5:20] = 1
+            
+            ### Drawing reward lines ###            
+            self.map[85:86, 80:95] = 2
+            self.map[60:75, 70:71] = 2
+            self.map[48:49, 50:65] = 2
+            self.map[30:45, 70:71] = 2
+            self.map[23:24, 80:95] = 2
+            self.map[5:20, 55:56] = 2
+            self.map[25:26, 30:45] = 2
+            self.map[65:66, 30:45] = 2
+            self.map[80:95, 25:26] = 2
+            self.map[65:66, 5:20] = 2
+            self.map[25:26, 5:20] = 2    
+    
+            ### Drawing finish lines ###    
+            self.map[0:5, 5:20] = 3
+            
+            self.starting_pos = [880,900]
+            
 
 
     def read_map(self, filename):
@@ -88,7 +124,7 @@ class Map():
                 elif self.map[int(i/self.tilesize),int(j/self.tilesize)] == 1:
                     pg.draw.rect(self.Game.win, GREY, (j, i, self.tilesize, self.tilesize))
                 elif self.map[int(i/self.tilesize),int(j/self.tilesize)] == 2:
-                    pg.draw.rect(self.Game.win, GREY, (j, i, self.tilesize, self.tilesize))
+                    pg.draw.rect(self.Game.win, RED, (j, i, self.tilesize, self.tilesize))
                 elif self.map[int(i/self.tilesize),int(j/self.tilesize)] == 3:
                     pg.draw.rect(self.Game.win, RED, (j, i, self.tilesize, self.tilesize))
 
@@ -96,12 +132,12 @@ class Map():
 
 class Car():
 
-    def __init__(self, Game, Map, x=800, y=800, vel = 0, theta = 0):
+    def __init__(self, Game, Map, x, y, vel = 0, theta = 0):
         self.Game = Game                                       # instance of Game class
         self.Map = Map                                         # instance of Map class
         self.tilesize = self.Map.tilesize
-        self.x = int(x)
-        self.y = int(y)
+        self.x = self.Map.starting_pos[0]
+        self.y = self.Map.starting_pos[1]
         self.theta = theta
         self.vel = vel                                         # how far car moves (in pixels) with each press of a button
         self.on_red = 0
@@ -164,6 +200,7 @@ class Car():
             else:
                 if self.on_red == 1:
                     self.Game.reward += 5
+                   
                 self.on_red = 0
             return False
             
@@ -238,7 +275,7 @@ class Game():
         self.clock = pg.time.Clock()
         pg.display.set_caption('Car Race')
         self.Map = Map(self)
-        self.Car = Car(self, self.Map)      # passing in self as the game class instance
+        self.Car = Car(self, self.Map, self.Map.starting_pos[0], self.Map.starting_pos[1])      # passing in self as the game class instance
         self.Map.draw()
         self.reward = 0
         self.done = False
@@ -254,8 +291,8 @@ class Game():
         self.model = model
 
         self.done = False
-        self.Car.x = 800
-        self.Car.y = 800
+        self.Car.x = self.Map.starting_pos[0]
+        self.Car.y = self.Map.starting_pos[1]
         self.Car.vel = 0
         self.Car.theta = 0
         self.Car.on_red = 0
@@ -344,9 +381,9 @@ class Game():
 
         self.redrawGameWindow()
         self.done = self.Car.checkLegalMove(self.Car.vel, self.Car.theta) # checks whether car is on road or not
-        self.reward += np.power(self.Car.vel,1)*0.0001                     # reward for vel
+        self.reward += (self.Car.vel)*0.001                 # reward for vel
         self.Car.vel = self.Car.drag(self.Car.vel)                        # add drag after each step
-        self.clock.tick(30)
+        self.clock.tick(100)
 
 
 
