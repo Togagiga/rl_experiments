@@ -1,10 +1,8 @@
 from racecar_env import Game
 import random
 import numpy as np
-import tensorflow as tf
 from tensorflow.keras import Sequential
 from tensorflow.keras.layers import Dense
-from tensorflow.keras.optimizers import Adam
 import matplotlib.pyplot as plt
 import sys
 
@@ -52,8 +50,9 @@ class AI():
     def __init__(self, action_space = 6, state_space = 6):
         self.action_space = action_space
         self.state_space = state_space
-        self.std_deviation = 0.1
+        self.std_deviation = 0.3
         self.mutation_probability = 0.1
+        self.pass_best_model_percentage = 1
 
         self.model = self.build_model()                               # creating model
 
@@ -87,7 +86,7 @@ class AI():
 
         cumulative_probabilities = self.get_cumulative_probs(generation_loss)
         next_gen = []
-        num_add = round(generation_size*0.2)           # 20% of generation_size
+        num_add = round(generation_size*self.pass_best_model_percentage) # 20% of generation_size
 
         for i in range(generation_size - num_add):     # samples 80% of next gen
             sample = np.random.rand()
@@ -122,7 +121,7 @@ class AI():
                             child_weights[0][i][j] = -1.0
                         else:
                             child_weights[0][i][j] = changed_weight
-                        # print(changed_weight)
+                        # print(child_weights[0][i][j])
 
             child_model.layers[l].set_weights(child_weights)
 
@@ -182,6 +181,13 @@ def train_AI(generations, generation_size = 10, time_steps = 300):
 
             generation_loss.append(score)
 
+        # change mutation probability
+        if np.mean(generation_loss) < 1:
+            mean_gen_loss = 1
+        else:
+            mean_gen_loss = np.mean(generation_loss)
+
+        AI().mutation_probability = (1/mean_gen_loss)
 
         # reassign current_gen using probabilistic method rather than deterministic
         next_gen = agent.get_next_gen(generation_loss, generation_size)
@@ -191,7 +197,7 @@ def train_AI(generations, generation_size = 10, time_steps = 300):
         current_gen = next_gen_temp
         print("")  # separating generation output in terminal
 
-        loss.append(generation_loss[np.argmax(generation_loss)])   # append to overall loss
+        loss.append(np.mean(generation_loss))  # append to overall loss
 
     return loss
 

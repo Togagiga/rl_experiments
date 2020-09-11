@@ -12,14 +12,12 @@ env.step() --- performs a single step in time and returns rewards, states and do
 import numpy as np
 import pygame as pg
 import math
-import time
-import random
 
 size = width, height = 1000, 1000                              # size of window
 car_width, car_height = 25, 50                                 # size of car
 
-vel_inc = 0.4
-theta_inc = 4
+vel_inc = 0.2
+theta_inc = 5
 drag_const = 0.001
 
 GREEN = (0, 138, 55)                                           # RGB Colours
@@ -346,7 +344,7 @@ class Game():
 
         self.redrawGameWindow()
         self.done = self.Car.checkLegalMove(self.Car.vel, self.Car.theta) # checks whether car is on road or not
-        self.reward += np.power(self.Car.vel,2)*0.0001                     # reward for vel
+        self.reward += np.power(self.Car.vel,1)*0.0001                     # reward for vel
         self.Car.vel = self.Car.drag(self.Car.vel)                        # add drag after each step
         self.clock.tick(30)
 
