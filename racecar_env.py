@@ -199,7 +199,7 @@ class Car():
             
             else:
                 if self.on_red == 1:
-                    self.Game.reward += 5
+                    self.Game.reward += 2
                    
                 self.on_red = 0
             return False
@@ -381,7 +381,7 @@ class Game():
 
         self.redrawGameWindow()
         self.done = self.Car.checkLegalMove(self.Car.vel, self.Car.theta) # checks whether car is on road or not
-        self.reward += (self.Car.vel)*0.001                 # reward for vel
+        self.reward += (self.Car.vel)*0.004                # reward for vel
         self.Car.vel = self.Car.drag(self.Car.vel)                        # add drag after each step
         self.clock.tick(100)
 

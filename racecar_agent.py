@@ -50,8 +50,8 @@ class AI():
     def __init__(self, action_space = 6, state_space = 6):
         self.action_space = action_space
         self.state_space = state_space
-        self.std_deviation = 0.3
-        self.mutation_probability = 0.1
+        self.std_deviation = 0.1
+        self.mutation_probability = 0.4
         self.pass_best_model_percentage = 1
 
         self.model = self.build_model()                               # creating model
@@ -134,7 +134,7 @@ class AI():
 
 
 
-def train_AI(generations, generation_size = 10, time_steps = 300):
+def train_AI(generations, generation_size = 10, time_steps = 320):
 
     print("\nRunning Training...")
     loss = []
@@ -182,12 +182,12 @@ def train_AI(generations, generation_size = 10, time_steps = 300):
             generation_loss.append(score)
 
         # change mutation probability
-        if np.mean(generation_loss) < 1:
-            mean_gen_loss = 1
+        if generation_loss[np.argmax(generation_loss)] < 1:
+            max_gen_loss = 1
         else:
-            mean_gen_loss = np.mean(generation_loss)
+            max_gen_loss = generation_loss[np.argmax(generation_loss)]
 
-        AI().mutation_probability = (1/mean_gen_loss)
+        agent.std_deviation = (1/max_gen_loss)
 
         # reassign current_gen using probabilistic method rather than deterministic
         next_gen = agent.get_next_gen(generation_loss, generation_size)
@@ -195,6 +195,7 @@ def train_AI(generations, generation_size = 10, time_steps = 300):
         for i in next_gen:
             next_gen_temp.append(current_gen[i])
         current_gen = next_gen_temp
+        print(agent.std_deviation)
         print("")  # separating generation output in terminal
 
         loss.append(np.mean(generation_loss))  # append to overall loss
@@ -208,8 +209,8 @@ def main():
         generation_size = int(sys.argv[2])
     except:
         print("No command line args specified. Using pre-defined parameters!")
-        generations = 5
-        generation_size = 5
+        generations = 20
+        generation_size = 10
 
     loss = train_AI(generations, generation_size)
     print(f"Generation Loss: {loss}")
