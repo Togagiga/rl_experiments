@@ -181,7 +181,7 @@ def train_AI(generations, generation_size = 10, time_steps = 320):
 
             generation_loss.append(score)
 
-        # change mutation probability
+        # change std_deviation
         if generation_loss[np.argmax(generation_loss)] < 1:
             max_gen_loss = 1
         else:
@@ -195,7 +195,7 @@ def train_AI(generations, generation_size = 10, time_steps = 320):
         for i in next_gen:
             next_gen_temp.append(current_gen[i])
         current_gen = next_gen_temp
-        print(agent.std_deviation)
+        print(f"std_deviation: {agent.std_deviation}")
         print("")  # separating generation output in terminal
 
         loss.append(np.mean(generation_loss))  # append to overall loss

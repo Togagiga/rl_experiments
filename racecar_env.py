@@ -71,7 +71,7 @@ class Map():
             
         else:
             ### Drawing roads ###    
-            self.map[60:100, 80:95] = 1
+            self.map[60:97, 80:95] = 1
             self.map[60:75, 50:95] = 1
             self.map[30:60, 50:65] = 1
             self.map[30:45, 65:95] = 1
